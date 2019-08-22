@@ -132,8 +132,11 @@ class FlexiBO(object):
             (pes_pareto,
             opt_pareto)=self.utils.construct_pareto_front(undominated_points_ind,
                                                           undominated_points)
+            pes_pareto_volume=self.utils.compute(pes_pareto)
+            opt_pareto_volume=self.utils.compute(opt_pareto)
+            volume_of_pareto_front=opt_pareto_volume-pes_pareto_volume
             # Determine next configuration and objective
-                 
+            next_sample=self.sample.determine_next_sample()
             # Update init_X and init_Y
             break
             

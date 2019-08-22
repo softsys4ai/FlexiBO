@@ -19,12 +19,21 @@ class Utils(object):
         return [list(x) for x in permutation], [{"o1":False, "o2":False} for _ in permutation], [{"o1":False, "o2":False} for _ in permutation]
     
 
-    def compute_pareto_volume():
+    def compute_pareto_volume(front):
         """This function is used to compute pareto volume between pessimistic and
         optimistic pareto front
         """
-        print "PARETO_VOLUME"
-         
+        prev_x=0
+        prev_y=0
+        area=0
+        for point in front:
+            a=point[self.O1_IND]-prev_x
+            b=point[self.O2_IND]-prev_y
+            area+=a*b
+            prev_x=point[self.O1_IND]
+        
+        return area
+    
     def construct_pareto_front(self,
                                pareto_points_ind,
                                pareto_points):
