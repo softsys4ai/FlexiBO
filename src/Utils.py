@@ -1,6 +1,5 @@
 import itertools
 import numpy as np
-from pareto import sample as region
 from operator import itemgetter
 
 
@@ -26,8 +25,9 @@ class Utils(object):
         """
         print "PARETO_VOLUME"
          
-    def construct_pareto_front(pareto_points_ind,
-                           pareto_points):
+    def construct_pareto_front(self,
+                               pareto_points_ind,
+                               pareto_points):
         """This function is used to construct the pareto front using pessimistic 
         and optimistic pareto points
         """
@@ -43,48 +43,36 @@ class Utils(object):
             opt_pareto.append(pareto_points[point]["opt"])
         
         # sort along object1 in descending order
-        sorted_pess_ind=sorted(range(len(pess_pareto)), key=lambda k: pess_pareto[k][O1_IND])[::-1]
-        sorted_opt_ind=sorted(range(len(opt_pareto)), key=lambda k: opt_pareto[k][O1_IND])[::-1]
+        sorted_pess_ind=sorted(range(len(pess_pareto)), key=lambda k: pess_pareto[k][self.O1_IND])[::-1]
+        sorted_opt_ind=sorted(range(len(opt_pareto)), key=lambda k: opt_pareto[k][self.O1_IND])[::-1]
         
         #-----------------------------------------------------------------------
         # Pessimistic Pareto Front Computation
         #-----------------------------------------------------------------------
         
-        pess_o2=[pess_pareto[i][O2_IND] for i in sorted_pess_ind]
-        temp_pess_o2 = [(v,i) for i,v in enumerate(pess_o2)]
-        temp_pess_o2.sort()
-        sorted_pess_o2, sorted_pess_o2_indices = zip(*temp_pess_o2)
-        sorted_pess_o2_indices=list(sorted_pess_o2_indices)
-
-        rank_map_pess_o2=[{} for _ in sorted_pess_o2_indices]   
-        for i in xrange(len(sorted_pess_o2_indices)):
-            rank_map_pess_o2[sorted_pess_o2_indices[i]]=i
-
-        pess_pareto_ind=[]
-        cur_rank=0
-        active_rank=-1
-        shifted_pess_o2=[]
-        for i in xrange(len(rank_map_pess_o2)):
-            if rank_map_pess_o2[i]==i:
-                pess_pareto.append(i)
-                cur_rank=i
-            elif rank_map_pess_o2[i]>=cur_rank:
-                if active_rank==-1:
-                    active_rank=cur_rank
-                    if len(shifted_pess_o2)==0:
-                        shifted_pess_o2=list(np.arange(cur_rank,rank_map_pess_o2[i]))
-                        cur_rank=rank_map_pess_o2[i]
-           
+        pess_o2=[pess_pareto[i][self.O2_IND] for i in sorted_pess_ind]
+        
+        i=0
+        max_val=[]
+        orig=[]
+        sampled_pess_pareto_ind=[]
+        while i<len(pess_o2): 
+            cur=pess_o2[i]
+            sampled_pess_pareto_ind.append(i)
+            orig.append(i)
+    
+            for j in xrange(i+1,len(pess_o2)):
+                if cur>=pess_o2[j]:
+                    sampled_pess_pareto_ind.append(i)
+                    max_val.append(j)
+                    orig.append(j)
+            if len(max_val)!=0:
+               i=np.max(max_val)+1
+               max_val=[]
             else:
-                if len(shifted_pess_o2)!=0: 
-                    if rank_map_pess_o2[i] in shifted_pess_o2:
-                        shifted_pess_o2.remove(rank_map_pess_o2[i])
-                        pess_pareto_ind.append(active_rank)
-                if len(shifted_pess_o2)==0:
-                  active_rank=-1
-       
-       
-        pess_pareto=[pess_o2[i] for i in pess_pareto_ind]
+               i=i+1
+        sampled_pess_pareto=[[pess_pareto[i][self.O1_IND],pess_o2[sampled_pess_pareto_ind[i]]]for i in xrange(len(orig))]
+        
         
         #-----------------------------------------------------------------------
         # Optimistic Pareto Front Computation
@@ -96,18 +84,23 @@ class Utils(object):
         sampled_opt_pareto=[cur]
         for ind in xrange(1,len(sorted_opt_ind)):
             next=opt_pareto[sorted_opt_ind[ind]]
-            if next[O2_IND]>=cur[O2_IND]:
+            if next[self.O2_IND]>=cur[self.O2_IND]:
                 sampled_opt_pareto_ind.append(sorted_opt_ind[ind])
                 sampled_opt_pareto.append(next)
             cur= opt_pareto[sorted_opt_ind[ind]]
         
+        # Final pessimistic and optimistic pareto front
+        final_pess_ind=[indices_map[i] for i in sampled_opt_pareto_ind]
         final_opt_ind=[indices_map[i] for i in sampled_opt_pareto_ind]
-                    
-                      
-    def compute_pareto_front(region):
+        
+        return sampled_pess_pareto, sampled_opt_pareto
+                             
+    def identify_undominated_points(self,
+                             region):
         """This function is used to determine the dominated points that will be
         included in the pessimistic and optimistic pareto front.
         """
+        
         dominated_points_ind=list()
         pes_pareto,opt_pareto=list(),list()
         undominated_points_ind=[i for i in xrange(len(region))]
@@ -121,25 +114,24 @@ class Utils(object):
                     if (undom_j!= undom_i or undom_j!=-1):
                         
                        # check if current config is dominated   
-                       if (region[undom_j]["pes"][O1_IND] >= cur["opt"][O1_IND] and
-                          region[undom_j]["pes"][O2_IND] >= cur["opt"][O2_IND]):
+                       if (region[undom_j]["pes"][self.O1_IND] >= cur["opt"][self.O1_IND] and
+                          region[undom_j]["pes"][self.O2_IND] >= cur["opt"][self.O2_IND]):
                           # append the current config to dominated
                           dominated_points_ind.append(undom_i)
                           undominated_points_ind[undom_i]=-1
           
                        # check if current config dominates
-                       if (region[undom_j]["opt"][O1_IND] < cur["pes"][O1_IND] and
-                          region[undom_j]["opt"][O2_IND] < cur["pes"][O2_IND]):
+                       if (region[undom_j]["opt"][self.O1_IND] < cur["pes"][self.O1_IND] and
+                          region[undom_j]["opt"][self.O2_IND] < cur["pes"][self.O2_IND]):
                           # append the config that is dominated by current to dominated 
                           dominated_points_ind.append(undom_j)
                           undominated_points_ind[undom_j]=-1
         
-        # TODO: Dominated Points Indices Multiple Occurence Issue                 
+        # TODO: Dominated points indices multiple occurence issue                 
         undominated_points_ind=[i for i in undominated_points_ind if i not in (-1,-1)]
         undominated_points=[region[i] for i in undominated_points_ind]
-        construct_pareto_front(undominated_points_ind,
-                               undominated_points)
-        return pes_pareto, opt_pareto
+        
+        return undominated_points_ind, undominated_points
         
 
 

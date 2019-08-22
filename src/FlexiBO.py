@@ -125,9 +125,13 @@ class FlexiBO(object):
                                        mu_o1+math.sqrt(BETA)*sigma_o1,
                                        mu_o2+math.sqrt(BETA)*sigma_o2
                                       ]
+            # Determine undominated points
+            (undominated_points_ind,
+            undominated_points)=self.utils.identify_undominated_points(REGION)
             # Determine pessimistic, average and optimistic pareto front
-            (PESS_P,OPT_P)=self.utils.compute_pareto_front(REGION)
-            
+            (pes_pareto,
+            opt_pareto)=self.utils.construct_pareto_front(undominated_points_ind,
+                                                          undominated_points)
             # Determine next configuration and objective
                  
             # Update init_X and init_Y
