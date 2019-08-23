@@ -2,26 +2,33 @@ import itertools
 import numpy as np
 from operator import itemgetter
 
-
 class Utils(object):
     def __init__(self):
         print ("Initializing Utils Class")
-        self.O1_IND=0
-        self.O2_IND=1
-    
+        self.O1_IND=1
+        self.O2_IND=0
+        
+
     def create_design_space(self,
                            bounds):
-        """This function is used to create discrete design space usign bounds
+        """@CREATE_DESIGN_SPACE
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        This function is used to create discrete design space usign bounds
         @input: bounds
         @output: design space- X
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         """
         permutation=list(itertools.product(*bounds))
         return [list(x) for x in permutation], [{"o1":False, "o2":False} for _ in permutation], [{"o1":False, "o2":False} for _ in permutation]
     
 
-    def compute_pareto_volume(front):
-        """This function is used to compute pareto volume between pessimistic and
+    def compute_pareto_volume(self,
+                              front):
+        """@COMPUTE_PARETO_VOLUME
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        This function is used to compute pareto volume between pessimistic and
         optimistic pareto front
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         """
         prev_x=0
         prev_y=0
@@ -34,33 +41,32 @@ class Utils(object):
         
         return area
     
-    def construct_pareto_front(self,
+    def construct_pessimistic_pareto_front(self,
                                pareto_points_ind,
-                               pareto_points):
-        """This function is used to construct the pareto front using pessimistic 
-        and optimistic pareto points
+                               pareto_points,
+                               mode):
+        """@CONSTRUCT_PESSIMISTIC_PARETO_FRONT
+        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        This function is used to construct pessimistic pareto front using the
+        undominated points
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         """
-        
-        pess_pareto=list()
-        opt_pareto=list()
-        indices_map={}
-        # sample pessimistic pareto points that will be used to construct 
-        # pessimistic pareto front        
-        for point in xrange(len(pareto_points)):
-            indices_map[point]=pareto_points_ind[point]
-            pess_pareto.append(pareto_points[point]["pes"])
-            opt_pareto.append(pareto_points[point]["opt"])
-        
+        if mode=="CONSTRUCT":
+            pess_pareto=list()
+            indices_map={}       
+            for point in xrange(len(pareto_points)):
+                indices_map[point]=pareto_points_ind[point]
+                pess_pareto.append(pareto_points[point]["pes"])
+        if mode=="UPDATE":
+            pess_pareto=pareto_points[:]          
         # sort along object1 in descending order
         sorted_pess_ind=sorted(range(len(pess_pareto)), key=lambda k: pess_pareto[k][self.O1_IND])[::-1]
-        sorted_opt_ind=sorted(range(len(opt_pareto)), key=lambda k: opt_pareto[k][self.O1_IND])[::-1]
-        
+               
         #-----------------------------------------------------------------------
         # Pessimistic Pareto Front Computation
         #-----------------------------------------------------------------------
         
         pess_o2=[pess_pareto[i][self.O2_IND] for i in sorted_pess_ind]
-        
         i=0
         max_val=[]
         orig=[]
@@ -80,9 +86,33 @@ class Utils(object):
                max_val=[]
             else:
                i=i+1
-        sampled_pess_pareto=[[pess_pareto[i][self.O1_IND],pess_o2[sampled_pess_pareto_ind[i]]]for i in xrange(len(orig))]
-        
-        
+        sampled_pess_pareto=[[pess_o2[sampled_pess_pareto_ind[i]],pess_pareto[i][self.O1_IND]]for i in xrange(len(orig))]
+        if mode=="CONSTRUCT":
+            return (sampled_pess_pareto, 
+                    indices_map)
+        if mode=="UPDATE":
+            return sampled_pess_pareto
+    
+    def construct_optimistic_pareto_front(self,
+                                          pareto_points_ind,
+                                          pareto_points,
+                                          mode):
+        """@CONSTRUCT_OPTIMISTIC_PARETO_FRONT
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        This function is used to construct optimistic pareto front using the 
+        undominated points
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        """
+        if mode=="CONSTRUCT":                                   
+            opt_pareto=list()
+            indices_map={}       
+            for point in xrange(len(pareto_points)):
+                indices_map[point]=pareto_points_ind[point]
+                opt_pareto.append(pareto_points[point]["opt"])
+        if mode=="UPDATE":
+            opt_pareto=pareto_points[:]
+        # sort along object1 in descending order
+        sorted_opt_ind=sorted(range(len(opt_pareto)), key=lambda k: opt_pareto[k][self.O1_IND])[::-1]
         #-----------------------------------------------------------------------
         # Optimistic Pareto Front Computation
         #-----------------------------------------------------------------------
@@ -98,16 +128,19 @@ class Utils(object):
                 sampled_opt_pareto.append(next)
             cur= opt_pareto[sorted_opt_ind[ind]]
         
-        # Final pessimistic and optimistic pareto front
-        final_pess_ind=[indices_map[i] for i in sampled_opt_pareto_ind]
-        final_opt_ind=[indices_map[i] for i in sampled_opt_pareto_ind]
-        
-        return sampled_pess_pareto, sampled_opt_pareto
+        if mode=="CONSTRUCT":
+            return (sampled_opt_pareto,
+                    indices_map)
+        if mode=="UPDATE":
+            return sampled_opt_pareto
                              
     def identify_undominated_points(self,
                              region):
-        """This function is used to determine the dominated points that will be
+        """@IDENTIFY_UNDOMINATED_POINTS
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        This function is used to determine the dominated points that will be
         included in the pessimistic and optimistic pareto front.
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         """
         
         dominated_points_ind=list()
@@ -140,7 +173,25 @@ class Utils(object):
         undominated_points_ind=[i for i in undominated_points_ind if i not in (-1,-1)]
         undominated_points=[region[i] for i in undominated_points_ind]
         
-        return undominated_points_ind, undominated_points
+        return (undominated_points_ind, 
+                undominated_points)
+           
+    def compute_improvement_per_cost(self):
+        """@COMPUTE_IMPROVEMENT_PER_COST
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        This function is used to compute improvement per cost
+        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        """
+        print "Improvement/Cost"
         
-
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
