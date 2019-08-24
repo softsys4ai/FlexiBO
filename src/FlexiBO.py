@@ -129,7 +129,7 @@ class FlexiBO(object):
                      dv_per_cost_pess[i]["o2"]=dv/self.O2_COST
         
         # compute dv/c for each point in pessimistic pareto front
-        dv_per_cost_opt=[{"o1":0,"o2":-0} for i in opt_ind]
+        dv_per_cost_opt=[{"o1":0,"o2":0} for i in opt_ind]
         for i in xrange(len(opt_pareto)):                   
              for j in xrange(self.NUM_OBJ):
                          
@@ -150,9 +150,34 @@ class FlexiBO(object):
                      dv_per_cost_pess[i]["o1"]=dv/self.O1_COST
                  if j==self.O2_IND:
                      dv_per_cost_pess[i]["o2"]=dv/self.O2_COST         
-              
-                 
-                            
+        max_dv_per_cost=0
+        objective="o1"      
+        for i in xrange(len(dv_per_cost_pess)):
+            if abs(dv_per_cost_pess[i]["o1"])>=max_dv_per_cost:
+                max_dv_per_cost_ind=i
+                max_dv_per_cost=abs(dv_per_cost_pess[i]["o1"])
+                objective="o1"
+            if abs(dv_per_cost_pess[i]["o2"])>=max_dv_per_cost:
+                max_dv_per_cost_ind=i
+                max_dv_per_cost=abs(dv_per_cost_pess[i]["o2"])
+                objective="o2"
+        cur_dv_per_cost_ind=indices_map[max_dv_per_cost_ind]
+        for i in xrange(len(dv_per_cost_opt)):
+            if abs(dv_per_cost_opt[i]["o1"])>=max_dv_per_cost:
+                max_dv_per_cost_ind=i
+                max_dv_per_cost=abs(dv_per_cost_pess[i]["o1"])
+                objective="o1"
+            if abs(dv_per_cost_opt[i]["o2"])>=max_dv_per_cost:
+                max_dv_per_cost_ind=i
+                max_dv_per_cost=abs(dv_per_cost_pess[i]["o2"])
+                objective="o2"
+        cur_dv_per_cost_ind=indices_map[max_dv_per_cost_ind]
+        
+        next_sample=self.E[cur_dv_per_cost_ind]
+        
+        return (next_sample, objective)
+        
+                           
     def perform_bo_loop(self):
         """This function is used to perform bayesian optimization loop
         U: Undecided Set
@@ -172,12 +197,15 @@ class FlexiBO(object):
                                     )
         
         U=np.array(self.E[:])
+        init_X1=init_X[:]
+        init_X2=init_X[:]
         # bo loop
         for iteration in xrange(self.NUM_ITER):
+            print "---------------------------------------Iteration: ",iteration
             REGION=[{} for _ in U]
             # Fit a GP for each objective
-            model_o1=self.SM.fit_gp(init_X,init_Y1)
-            model_o2=self.SM.fit_gp(init_X,init_Y2)
+            model_o1=self.SM.fit_gp(init_X1,init_Y1)
+            model_o2=self.SM.fit_gp(init_X2,init_Y2)
             for config in xrange(len(U)):
                 # Compute mu and sigma of each points for each objective 
                 cur=np.array([U[config]])
@@ -205,7 +233,7 @@ class FlexiBO(object):
                                        mu_o1+math.sqrt(BETA)*sigma_o1,
                                        mu_o2+math.sqrt(BETA)*sigma_o2
                                       ]
-            """
+            
             self.REGION=[
                    {'opt': [2, 11], 'avg': [1, 10], 'pes': [0.5,9]},
                    {'opt': [3, 9], 'avg': [2.5, 8], 'pes': [1.5,7]},
@@ -215,7 +243,7 @@ class FlexiBO(object):
                    {'opt': [3.5, 3.5], 'avg': [3, 3], 'pes': [2.5,2.5]},
                    {'opt': [5.5, 3], 'avg': [5, 2], 'pes': [4.5,1.5]}
                    ] 
-            """
+            
             # Determine undominated points
             (undominated_points_ind,
             undominated_points)=self.utils.identify_undominated_points(self.REGION)
@@ -232,15 +260,26 @@ class FlexiBO(object):
             # Determine volume of the pareto front
             volume_of_pareto_front=opt_pareto_volume-pess_pareto_volume
             # Determine next configuration and objective
-            next_sample=self.determine_next_sample(pess_pareto,
+            (next_sample, objective)=self.determine_next_sample(pess_pareto,
                                                    opt_pareto,
                                                    pess_indices_map,
                                                    opt_indices_map,
                                                    pess_pareto_volume,
                                                    opt_pareto_volume)
             
+            # Perform measurement on next sample on the objective returned
             # Update init_X and init_Y
-            break
+            if objective=="o1":
+                cur_X1=np.array(next_sample)
+                cur_Y1=np.array(self.rf1.predict([cur_X1]))
+                np.vstack((init_X1,cur_X1))
+                np.vstack((init_Y1,cur_Y1))
+            if objective=="o2":
+                cur_X2=np.array(next_sample)
+                cur_Y2=np.array(self.rf2.predict([cur_X2]))
+                np.vstack((init_X2,np.array(next_sample)))
+                np.vstack((init_Y2,cur_Y2))
+            
             
           
         
