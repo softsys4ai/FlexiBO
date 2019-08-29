@@ -1,3 +1,10 @@
+"""-----------------------------------------------------------------------------
+@Name: Flexible Bayesian Optimization (FlexiBO): An active learning for optimiz-
+ing  multiple objectives of different cost
+@Version: 0.1
+@Author: Shahriar Iqbal
+--------------------------------------------------------------------------------
+"""
 import math
 import Config
 import numpy as np
@@ -124,8 +131,8 @@ class FlexiBO(object):
                 
                 # Compute uncertainty region for each point using mu and sigma
                 REGION[config]["pes"]=[
-                                       0 if (mu_o1-math.sqrt(BETA)*sigma_o1)<0 else mu_o1-math.sqrt(BETA)*sigma_o1,
-                                       0 if (mu_o2-math.sqrt(BETA)*sigma_o2)<0 else mu_o2-math.sqrt(BETA)*sigma_o2
+                0 if (mu_o1-math.sqrt(BETA)*sigma_o1)<0 else mu_o1-math.sqrt(BETA)*sigma_o1,
+                0 if (mu_o2-math.sqrt(BETA)*sigma_o2)<0 else mu_o2-math.sqrt(BETA)*sigma_o2
                 ]
                 REGION[config]["avg"]=[mu_o1,mu_o2]
                 REGION[config]["opt"]=[
@@ -159,14 +166,18 @@ class FlexiBO(object):
             # Determine volume of the pareto front
             volume_of_pareto_front=opt_pareto_volume-pess_pareto_volume
             # Determine next configuration and objective
-            (next_sample_index, next_sample, objective)=self.sample.determine_next_sample(pess_pareto,
-                                                                                          opt_pareto,
-                                                                                          pess_indices_map,
-                                                                                          opt_indices_map,
-                                                                                          pess_pareto_volume,
-                                                                                          opt_pareto_volume,
-                                                                                          REGION,
-                                                                                          self.E)
+            (next_sample_index, 
+            next_sample, 
+            objective)=self.sample.determine_next_sample(
+                                                         pess_pareto,
+                                                         opt_pareto,
+                                                         pess_indices_map,
+                                                         opt_indices_map,
+                                                         pess_pareto_volume,
+                                                         opt_pareto_volume,
+                                                         REGION,
+                                                         self.E
+                                                        )
             
             # Perform measurement on next sample on the objective returned
             # Update init_X and init_Y

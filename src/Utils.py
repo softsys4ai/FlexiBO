@@ -1,3 +1,10 @@
+"""-----------------------------------------------------------------------------
+@Name: Flexible Bayesian Optimization (FlexiBO): An active learning for optimiz-
+ing  multiple objectives of different cost
+@Version: 0.1
+@Author: Shahriar Iqbal
+--------------------------------------------------------------------------------
+"""
 import itertools
 import numpy as np
 from operator import itemgetter
@@ -12,11 +19,11 @@ class Utils(object):
     def create_design_space(self,
                            bounds):
         """@CREATE_DESIGN_SPACE
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         This function is used to create discrete design space usign bounds
         @input: bounds
         @output: design space- X
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         """
         permutation=list(itertools.product(*bounds))
         return [list(x) for x in permutation], [{"o1":False, "o2":False} for _ in permutation], [{"o1":False, "o2":False} for _ in permutation]
@@ -25,10 +32,10 @@ class Utils(object):
     def compute_pareto_volume(self,
                               front):
         """@COMPUTE_PARETO_VOLUME
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         This function is used to compute pareto volume between pessimistic and
         optimistic pareto front
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         """
         prev_x=0
         prev_y=0
@@ -46,10 +53,10 @@ class Utils(object):
                                pareto_points,
                                mode):
         """@CONSTRUCT_PESSIMISTIC_PARETO_FRONT
-        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         This function is used to construct pessimistic pareto front using the
         undominated points
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         """
         if mode=="CONSTRUCT":
             pess_pareto=list()
@@ -98,10 +105,10 @@ class Utils(object):
                                           pareto_points,
                                           mode):
         """@CONSTRUCT_OPTIMISTIC_PARETO_FRONT
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         This function is used to construct optimistic pareto front using the 
         undominated points
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         """
         if mode=="CONSTRUCT":                                   
             opt_pareto=list()
@@ -137,10 +144,10 @@ class Utils(object):
     def identify_undominated_points(self,
                              region):
         """@IDENTIFY_UNDOMINATED_POINTS
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         This function is used to determine the dominated points that will be
         included in the pessimistic and optimistic pareto front.
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         """
         
         dominated_points_ind=list()
@@ -178,9 +185,9 @@ class Utils(object):
            
     def compute_improvement_per_cost(self):
         """@COMPUTE_IMPROVEMENT_PER_COST
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         This function is used to compute improvement per cost
-        ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ------------------------------------------------------------------------
         """
         print "Improvement/Cost"
         
