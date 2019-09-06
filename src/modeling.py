@@ -6,7 +6,7 @@ class Modeling:
     """
     def __init__(self):
         print "[STATUS]: initializing modeling class"
-        self.INPUT_DIM=7
+        self.INPUT_DIM=2
         self.OUTPUT_DIM=1
 
     def fit_gp(self,

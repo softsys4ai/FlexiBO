@@ -26,16 +26,17 @@ class FlexiBO(object):
         self.NUM_OBJ = 2
         self.O1_IND = 1
         self.O2_IND = 0
-        if mode == "Test": self.conf = config.ConfigTest()
+        self.mode = mode
+        if self.mode == "Test": self.conf = config.ConfigTest()
         # mode of flexibo operation
-        elif mode == "Real": self.conf = config.ConfigReal()
-        elif mode == "Synthetic": self.conf = config.ConfigSynthetic()
+        elif self.mode == "Real": self.conf = config.ConfigReal()
+        elif self.mode == "Synthetic": self.conf = config.ConfigSynthetic()
         else: print "mode not supported" ; return
         # get design space
         (self.E,
         self.O,
         self.measurement) = self.conf.set_design_space()
-        self.conf.set_evaluation()
+
         # define handlers for utils classes
         self.pareto = Pareto()
         self.sampling = Sampling()
@@ -50,6 +51,7 @@ class FlexiBO(object):
         """
         # initialization
         BETA = 1.0
+
         (eval_O1,
         eval_O2,
         init_X,
@@ -160,16 +162,26 @@ class FlexiBO(object):
 
             # perform measurement on next Sampling on the objective returned and
             if next_objective == "o1":
-                cur_X1, cur_Y1 = self.conf.get_measurement(eval_O1,
-                                                  next_X)
+                if self.mode == "Test":
+                    cur_X1, cur_Y1 = self.conf.get_measurement(eval_O1, next_X)
+                elif self.mode == "Synthetic":
+                    cur_X1 = np.array(next_X)
+                    cur_Y1 = np.array(eval_O1[next_X_index])
+                else:
+                    return
                 self.O[next_X_index][next_objective] = True
                 self.measurement[next_X_index][next_objective] = cur_Y1[0]
                 np.vstack((init_X1, cur_X1))
                 np.vstack((init_Y1, cur_Y1))
 
             elif next_objective == "o2":
-                cur_X2, cur_Y2 = self.conf.get_measurement(eval_O2,
-                                                  next_X)
+                if self.mode == "Test":
+                    cur_X2, cur_Y2 = self.conf.get_measurement(eval_O2, next_X)
+                elif self.mode == "Synthetic":
+                    cur_X2 = np.array(next_X)
+                    cur_Y2 = np.array(eval_O2[next_X_index])
+                else:
+                    return
                 self.O[next_X_index][next_objective] = True
                 self.measurement[next_X_index][next_objective] = cur_Y2[0]
                 np.vstack((init_X2, cur_X2))
