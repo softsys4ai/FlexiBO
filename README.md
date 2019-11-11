@@ -2,7 +2,7 @@
 A multi-objective optimization algorithm to optimize multiple objectives of 
 different costs. Currently, we support multi-objective optimization of two 
 different objectives using gaussian process (GP) and random forest (RF) surrogate 
-models. We implement this method to optimiza accuracy and energy consumption of 
+models. We implement this method to optimize accuracy and energy consumption of 
 different deep neural networks.
 
 ## Instructions 
