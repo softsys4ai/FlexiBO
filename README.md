@@ -7,7 +7,14 @@ different deep neural networks.
 
 ## Instructions 
 FlexiBO is developed to perform multi-objective optimization on resource constrained
-devices specially NVIDIA Jetson Tegra X2 (TX2) and NVIDIA Jetson Xavier. 
+devices specially NVIDIA Jetson Tegra X2 (TX2) and NVIDIA Jetson Xavier. To run 
+FlexiBO please resolve the following dependencies:
+* GPy
+* apscheduler
+* scikit-learn
+* PyTorch
+* Keras (Tensorflow)
+
 
 ## Run
 To run FlexiBO use the following command:
