@@ -1,5 +1,7 @@
+import sys
 import pandas as pd
-from src.FlexiBO import FlexiBO
+from src.flexibo import FlexiBO
 
-df=pd.read_csv('./data/Input/it_ec_te_obj.csv')
-bo=FlexiBO(df)
+if __name__=="__main__":
+    mode = sys.argv[1]
+    bo=FlexiBO(mode)
