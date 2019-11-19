@@ -139,7 +139,7 @@ class FlexiBO(object):
                                        mu_o1+math.sqrt(BETA)*sigma_o1,
                                        mu_o2+math.sqrt(BETA)*sigma_o2
                                       ]
-            
+            """
             self.REGION=[
                    {'opt': [2, 11], 'avg': [1, 10], 'pes': [0.5,9]},
                    {'opt': [3, 9], 'avg': [2.5, 8], 'pes': [1.5,7]},
@@ -149,7 +149,7 @@ class FlexiBO(object):
                    {'opt': [3.5, 3.5], 'avg': [3, 3], 'pes': [2.5,2.5]},
                    {'opt': [5.5, 3], 'avg': [5, 2], 'pes': [4.5,1.5]}
                    ] 
-            
+            """
             # Determine undominated points
             (undominated_points_ind,
             undominated_points)=self.utils.identify_undominated_points(self.REGION)
