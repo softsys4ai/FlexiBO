@@ -25,3 +25,14 @@ For example, to run optimization with GP use:
 ```python
 command: python RunFlexiBO.py GP
 ```
+
+## Contacts
+
+* Md Shahriar Iqbal (miqbal@email.sc.edu)
+* Pooyan Jamshidi (pooyan.jamshidi@gmail.com)
+
+## Acknowledgments
+
+This project has been partially supported by: 
+* AFRL and DARPA (FA8750-16-2-0042)
+* ASPIRE grant from the Office ofthe Vice President for Research at the University of South Carolina
