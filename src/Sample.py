@@ -6,19 +6,19 @@ ing  multiple objectives of different cost
 --------------------------------------------------------------------------------
 """
 from __future__ import division
-from Utils import Utils
+from src.Utils import Utils
 import numpy as np
 
 class Sample(object):
     """This class is used to determine next sample and objective
     """
     def __init__(self):
-         print "Initializing Sample Class" 
+         print ("Initializing Sample Class") 
          self.O1_IND=1
          self.O2_IND=0
          self.NUM_OBJ=2
          self.O1_COST=1
-         self.O2_COST=8*self.O1_COST       
+         self.O2_COST=17.6*self.O1_COST       
          self.utils=Utils()
          
     def determine_next_sample(self,
@@ -37,8 +37,8 @@ class Sample(object):
         """
         if pess_indices_map==opt_indices_map:
             indices_map=pess_indices_map
-        pess_ind=[indices_map[i] for i in xrange(len(pess_pareto))]
-        opt_ind=[indices_map[i] for i in xrange(len(opt_pareto))]
+        pess_ind=[indices_map[i] for i in range(0,len(pess_pareto))]
+        opt_ind=[indices_map[i] for i in range(0,len(opt_pareto))]
         
         pess_status=[[{"pess":True,"opt":True}] if i in opt_ind else [{"pess":True,"opt":False}] for i in pess_ind]
         opt_status=[[{"pess":True,"opt":True}] if i in pess_ind else [{"pess":False,"opt":True}] for i in opt_ind]
@@ -47,8 +47,8 @@ class Sample(object):
         # compute dv/c for each point in pessimistic pareto front
         #-----------------------------------------------------------------------
         dv_per_cost_pess=[{"o1":0,"o2":0} for i in pess_ind]
-        for i in xrange(len(pess_pareto)):                   
-             for j in xrange(self.NUM_OBJ):
+        for i in range(0,len(pess_pareto)):                   
+             for j in range(0,self.NUM_OBJ):
                  # Update pessimistic pareto front shring pess to avg  
                  if pess_status[i][0]["pess"] is True:    
                      cur_pess=pess_pareto[:]
@@ -84,8 +84,8 @@ class Sample(object):
         # compute dv/c for each point in optimistic pareto front
         #-----------------------------------------------------------------------
         dv_per_cost_opt=[{"o1":0,"o2":0} for i in opt_ind]
-        for i in xrange(len(opt_pareto)):                   
-             for j in xrange(self.NUM_OBJ):
+        for i in range(0,len(opt_pareto)):                   
+             for j in range(0,self.NUM_OBJ):
                  # Update optimistic pareto front shring opt to avg. Similar points
                  # both in pess and opt pareto fronts are already covered in
                  # pessimistic pareto front update computation         
@@ -116,7 +116,7 @@ class Sample(object):
         objective="o1"
         
         # Compute max dv per cost from pessimistic pareto points      
-        for i in xrange(len(dv_per_cost_pess)):
+        for i in range(0,len(dv_per_cost_pess)):
             if abs(dv_per_cost_pess[i]["o1"])>=max_dv_per_cost:
                 max_dv_per_cost_ind=i
                 max_dv_per_cost=abs(dv_per_cost_pess[i]["o1"])
@@ -128,7 +128,7 @@ class Sample(object):
         cur_dv_per_cost_ind=indices_map[max_dv_per_cost_ind]
         
         # Compute max dv per cost from optimistic pareto points
-        for i in xrange(len(dv_per_cost_opt)):
+        for i in range(0,len(dv_per_cost_opt)):
             if abs(dv_per_cost_opt[i]["o1"])>=max_dv_per_cost:
                 max_dv_per_cost_ind=i
                 max_dv_per_cost=abs(dv_per_cost_pess[i]["o1"])

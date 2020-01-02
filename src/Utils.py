@@ -16,19 +16,6 @@ class Utils(object):
         self.O2_IND=0
         
 
-    def create_design_space(self,
-                           bounds):
-        """@CREATE_DESIGN_SPACE
-        ------------------------------------------------------------------------
-        This function is used to create discrete design space usign bounds
-        @input: bounds
-        @output: design space- X
-        ------------------------------------------------------------------------
-        """
-        permutation=list(itertools.product(*bounds))
-        return [list(x) for x in permutation], [{"o1":False, "o2":False} for _ in permutation], [{"o1":False, "o2":False} for _ in permutation]
-    
-
     def compute_pareto_volume(self,
                               front):
         """@COMPUTE_PARETO_VOLUME
@@ -61,7 +48,7 @@ class Utils(object):
         if mode=="CONSTRUCT":
             pess_pareto=list()
             indices_map={}       
-            for point in xrange(len(pareto_points)):
+            for point in range(0,len(pareto_points)):
                 indices_map[point]=pareto_points_ind[point]
                 pess_pareto.append(pareto_points[point]["pes"])
         if mode=="UPDATE":
@@ -83,7 +70,7 @@ class Utils(object):
             sampled_pess_pareto_ind.append(i)
             orig.append(i)
     
-            for j in xrange(i+1,len(pess_o2)):
+            for j in range(i+1,len(pess_o2)):
                 if cur>=pess_o2[j]:
                     sampled_pess_pareto_ind.append(i)
                     max_val.append(j)
@@ -93,7 +80,7 @@ class Utils(object):
                max_val=[]
             else:
                i=i+1
-        sampled_pess_pareto=[[pess_o2[sampled_pess_pareto_ind[i]],pess_pareto[i][self.O1_IND]]for i in xrange(len(orig))]
+        sampled_pess_pareto=[[pess_o2[sampled_pess_pareto_ind[i]],pess_pareto[i][self.O1_IND]]for i in range(0,len(orig))]
         if mode=="CONSTRUCT":
             return (sampled_pess_pareto, 
                     indices_map)
@@ -113,7 +100,7 @@ class Utils(object):
         if mode=="CONSTRUCT":                                   
             opt_pareto=list()
             indices_map={}       
-            for point in xrange(len(pareto_points)):
+            for point in range(0,len(pareto_points)):
                 indices_map[point]=pareto_points_ind[point]
                 opt_pareto.append(pareto_points[point]["opt"])
         if mode=="UPDATE":
@@ -128,7 +115,7 @@ class Utils(object):
         # initialize 
         sampled_opt_pareto_ind=[sorted_opt_ind[0]]
         sampled_opt_pareto=[cur]
-        for ind in xrange(1,len(sorted_opt_ind)):
+        for ind in range(1,len(sorted_opt_ind)):
             next=opt_pareto[sorted_opt_ind[ind]]
             if next[self.O2_IND]>=cur[self.O2_IND]:
                 sampled_opt_pareto_ind.append(sorted_opt_ind[ind])
@@ -152,7 +139,7 @@ class Utils(object):
         
         dominated_points_ind=list()
         pes_pareto,opt_pareto=list(),list()
-        undominated_points_ind=[i for i in xrange(len(region))]
+        undominated_points_ind=[i for i in range(0,len(region))]
         
         for undom_i in undominated_points_ind:
             # if the current config is not dominated 
@@ -189,7 +176,7 @@ class Utils(object):
         This function is used to compute improvement per cost
         ------------------------------------------------------------------------
         """
-        print "Improvement/Cost"
+        print ("Improvement/Cost")
         
         
         
