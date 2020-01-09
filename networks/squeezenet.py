@@ -12,180 +12,99 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Xception (2016)
-# https://arxiv.org/pdf/1610.02357.pdf
+# SqueezeNet v1.0 (2016)
+# Paper: https://arxiv.org/pdf/1602.07360.pdf
 
 import tensorflow as tf
-from tensorflow.keras import layers, Input, Model
+from tensorflow.keras import Input, Model
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Concatenate, Dropout
+from tensorflow.keras.layers import GlobalAveragePooling2D, Activation
 
-def entryFlow(inputs):
-    """ Create the entry flow section
-        inputs : input tensor to neural network
-    """
-
-    def stem(inputs):
-        """ Create the stem entry into the neural network
-            inputs : input tensor to neural network
-        """
-        # Strided convolution - dimensionality reduction
-        # Reduce feature maps by 75%
-        x = layers.Conv2D(32, (3, 3), strides=(2, 2))(inputs)
-        x = layers.BatchNormalization()(x)
-        x = layers.ReLU()(x)
-
-        # Convolution - dimensionality expansion
-        # Double the number of filters
-        x = layers.Conv2D(64, (3, 3), strides=(1, 1))(x)
-        x = layers.BatchNormalization()(x)
-        x = layers.ReLU()(x)
-        return x
-
-    # Create the stem to the neural network
-    x = stem(inputs)
-
-    # Create three residual blocks
-    for n_filters in [128, 256, 728]:
-        x = projection_block(x, n_filters)
-
+def stem(inputs):
+    ''' Construct the Stem Group  
+	inputs: the input tensor
+    '''
+    x = Conv2D(96, (7, 7), strides=2, padding='same', activation='relu',
+               kernel_initializer='glorot_uniform')(inputs)
+    x = MaxPooling2D(3, strides=2)(x)
     return x
 
-def middleFlow(x):
-    """ Create the middle flow section
-        x : input tensor into section
-    """
-    # Create 8 residual blocks
-    for _ in range(8):
-        x = residual_block(x, 728)
+def learner(x):
+    ''' Construct the Learner
+   	x    : input to the learner
+    '''
+    # First fire group, progressively increase number of filters
+    x = group(x, [16, 16, 32])
+
+    # Second fire group
+    x = group(x, [32, 48, 48, 64])
+
+    # Last fire block (module)
+    x = fire_block(x, 64)
+
+    # Dropout is delayed to end of fire groups
+    x = Dropout(0.5)(x)
     return x
 
-def exitFlow(x, n_classes):
-    """ Create the exit flow section
-        x         : input to the exit flow section
-        n_classes : number of output classes
-    """
-    def classifier(x, n_classes):
-        """ The output classifier
-            x         : input to the classifier
-            n_classes : number of output classes
-        """
-        # Global Average Pooling will flatten the 10x10 feature maps into 1D
-        # feature maps
-        x = layers.GlobalAveragePooling2D()(x)
-        
-        # Fully connected output layer (classification)
-        x = layers.Dense(n_classes, activation='softmax')(x)
-        return x
+def group(x, filters):
+    ''' Construct a Fire Group
+        x     : input to the group
+        filters: list of number of filters per fire block (module)
+    '''
+    # Add the fire blocks (modules) for this group
+    for n_filters in filters:
+        x = fire_block(x, n_filters)
 
-    # Remember the input
-    shortcut = x
-
-    # Strided convolution to double number of filters in identity link to
-    # match output of residual block for the add operation (projection shortcut)
-    shortcut = layers.Conv2D(1024, (1, 1), strides=(2, 2),
-                             padding='same')(shortcut)
-    shortcut = layers.BatchNormalization()(shortcut)
-
-    # First Depthwise Separable Convolution
-    # Dimensionality reduction - reduce number of filters
-    x = layers.SeparableConv2D(728, (3, 3), padding='same')(x)
-    x = layers.BatchNormalization()(x)
-
-    # Second Depthwise Separable Convolution
-    # Dimensionality restoration
-    x = layers.SeparableConv2D(1024, (3, 3), padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
-
-    # Create pooled feature maps, reduce size by 75%
-    x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
-
-    # Add the projection shortcut to the output of the pooling layer
-    x = layers.add([x, shortcut])
-
-    # Third Depthwise Separable Convolution
-    x = layers.SeparableConv2D(1556, (3, 3), padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
-
-    # Fourth Depthwise Separable Convolution
-    x = layers.SeparableConv2D(2048, (3, 3), padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
-
-    # Create classifier section
-    x = classifier(x, n_classes)
-
+    # Delayed downsampling
+    x = MaxPooling2D((3, 3), strides=(2, 2))(x)
     return x
 
-def projection_block(x, n_filters):
-    """ Create a residual block using Depthwise Separable Convolutions with Projection shortcut
-        x        : input into residual block
+
+def fire_block(x, n_filters):
+    ''' Construct a Fire Block
+	x        : input to the block
         n_filters: number of filters
-    """
-    # Remember the input
-    shortcut = x
-    
-    # Strided convolution to double number of filters in identity link to
-    # match output of residual block for the add operation (projection shortcut)
-    shortcut = layers.Conv2D(n_filters, (1, 1), strides=(2, 2), padding='same')(shortcut)
-    shortcut = layers.BatchNormalization()(shortcut)
+    '''
+    # squeeze layer
+    squeeze = Conv2D(n_filters, (1, 1), strides=1, activation='relu',
+                     padding='same', kernel_initializer='glorot_uniform')(x)
 
-    # First Depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
+    # branch the squeeze layer into a 1x1 and 3x3 convolution and double the number
+    # of filters
+    expand1x1 = Conv2D(n_filters * 4, (1, 1), strides=1, activation='relu',
+                      padding='same', kernel_initializer='glorot_uniform')(squeeze)
+    expand3x3 = Conv2D(n_filters * 4, (3, 3), strides=1, activation='relu',
+                      padding='same', kernel_initializer='glorot_uniform')(squeeze)
 
-    # Second depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
-
-    # Create pooled feature maps, reduce size by 75%
-    x = layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
-
-    # Add the projection shortcut to the output of the block
-    x = layers.add([x, shortcut])
-
+    # concatenate the feature maps from the 1x1 and 3x3 branches
+    x = Concatenate()([expand1x1, expand3x3])
     return x
 
-def residual_block(x, n_filters):
-    """ Create a residual block using Depthwise Separable Convolutions
-        x        : input into residual block
-        n_filters: number of filters
-    """
-    # Remember the input
-    shortcut = x
+def classifier(x, n_classes):
+    ''' Construct the Classifier 
+	x        : input to the classifier
+	n_classes: number of output classes
+    '''
+    # set the number of filters equal to number of classes
+    x = Conv2D(n_classes, (1, 1), strides=1, activation='relu', padding='same',
+               kernel_initializer='glorot_uniform')(x)
 
-    # First Depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
-
-    # Second depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
-
-    # Third depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.ReLU()(x)
-    
-    # Add the identity link to the output of the block
-    x = layers.add([x, shortcut])
+    # reduce each filter (class) to a single value
+    x = GlobalAveragePooling2D()(x)
+    x = Activation('softmax')(x)
     return x
 
-# Create the input vector
-inputs = Input(shape=(299, 299, 3))
+# The input shape
+inputs = Input((224, 224, 3))
 
-# Create entry section
-x = entryFlow(inputs)
+# The Stem Group
+x = stem(inputs)
 
-# Create the middle section
-x = middleFlow(x)
+# The Learner
+x = learner(x)
 
-# Create the exit section for 1000 classes
-outputs = exitFlow(x, 1000)
+# The classifier
+outputs = classifier(x, 1000)
 
-# Instantiate the model
+# Instantiate the Model
 model = Model(inputs, outputs)

@@ -176,7 +176,7 @@ def residual_block(x, n_filters):
     return x
 
 # Create the input vector
-inputs = Input(shape=(299, 299, 3))
+inputs = Input(shape=(32, 32, 3))
 
 # Create entry section
 x = entryFlow(inputs)
@@ -185,7 +185,17 @@ x = entryFlow(inputs)
 x = middleFlow(x)
 
 # Create the exit section for 1000 classes
-outputs = exitFlow(x, 1000)
+outputs = exitFlow(x, 10)
 
 # Instantiate the model
 model = Model(inputs, outputs)
+
+model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['acc'])
+model.summary()
+
+from tensorflow.keras.datasets import cifar10 
+import numpy as np
+(x_train, y_train), (x_test, y_test) = cifar10.load_data() 
+x_train = (x_train / 255.0).astype(np.float32) 
+x_test = (x_test / 255.0).astype(np.float32) 
+model.fit(x_train, y_train, epochs=10, batch_size=32, validation_split=0.1, verbose=1)
