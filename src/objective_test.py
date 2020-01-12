@@ -1,4 +1,3 @@
-#! /usr/bin/env python2.7
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 class ObjectiveTest:
@@ -12,8 +11,8 @@ class ObjectiveTest:
                Y1,
                Y2):
         """This function is used to predict"""
-        rf1 = RandomForestRegressor(n_estimators = 16)
-        rf2 = RandomForestRegressor(n_estimators = 16)
+        rf1 = RandomForestRegressor(n_estimators = 128)
+        rf2 = RandomForestRegressor(n_estimators = 128)
         rf1.fit(X, Y1)
         rf2.fit(X, Y2)
         return (

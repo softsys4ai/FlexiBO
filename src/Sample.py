@@ -14,8 +14,8 @@ class Sample(object):
     """
     def __init__(self):
          print ("Initializing Sample Class") 
-         self.O1_IND=1
-         self.O2_IND=0
+         self.O1_IND=0
+         self.O2_IND=1
          self.NUM_OBJ=2
          self.O1_COST=1
          self.O2_COST=17.6*self.O1_COST       
@@ -140,6 +140,7 @@ class Sample(object):
         
         # Compute next sample
         cur_dv_per_cost_ind=indices_map[max_dv_per_cost_ind]
+        
         next_sample=E[cur_dv_per_cost_ind]
         return (cur_dv_per_cost_ind,
                 next_sample, 
