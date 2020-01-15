@@ -19,14 +19,15 @@
 import tensorflow as tf
 from tensorflow.keras import layers, Input, Model
 
-def stem(inputs, alpha):
+def stem(inputs, alpha, n_filters, 
+        filter_size):
     """ Construct the stem group
         inputs : input tensor
         alpha  : width multiplier
     """
     # Convolutional block
     x = layers.ZeroPadding2D(padding=((0, 1), (0, 1)))(inputs)
-    x = layers.Conv2D(32, (3, 3), strides=(2, 2), padding='valid')(x)
+    x = layers.Conv2D(n_filters, (filter_size, filter_size), strides=(2, 2), padding='valid')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
@@ -95,28 +96,29 @@ n_classes = 1000 # number of classes
 inputs = Input(shape=(224, 224, 3))
 
 # Create the stem group
-x = stem(inputs, alpha)    
+x = stem(inputs, alpha, stem_n_filters, 
+        stem_filter_size)    
 
 # First Depthwise Separable Convolution Group
 # Strided convolution - feature map size reduction
-x = depthwise_block(x, 128, alpha, strides=(2, 2))
-x = depthwise_block(x, 128, alpha, strides=(1, 1))
+x = depthwise_block(x, depthwise_block1_n_filters, alpha, strides=(2, 2))
+x = depthwise_block(x, depthwise_block1_n_filters, alpha, strides=(1, 1))
 
 # Second Depthwise Separable Convolution Group
 # Strided convolution - feature map size reduction
-x = depthwise_block(x, 256, alpha, strides=(2, 2))
-x = depthwise_block(x, 256, alpha, strides=(1, 1))
+x = depthwise_block(x, depthwise_block2_n_filters, alpha, strides=(2, 2))
+x = depthwise_block(x, depthwise_block2_n_filters, alpha, strides=(1, 1))
 
 # Third Depthwise Separable Convolution Group
 # Strided convolution - feature map size reduction
-x = depthwise_block(x, 512, alpha, strides=(2, 2))
+x = depthwise_block(x, depthwise_block3_n_filters, alpha, strides=(2, 2))
 for _ in range(5):
-    x = depthwise_block(x, 512, alpha, strides=(1, 1))
+    x = depthwise_block(x, depthwise_block3_n_filters, alpha, strides=(1, 1))
 
 # Fourth Depthwise Separable Convolution Group
 # Strided convolution - feature map size reduction
-x = depthwise_block(x, 1024, alpha, strides=(2, 2))
-x = depthwise_block(x, 1024, alpha, strides=(1, 1))
+x = depthwise_block(x, depthwise_block4_n_filters, alpha, strides=(2, 2))
+x = depthwise_block(x, depthwise_block4_n_filters, alpha, strides=(1, 1))
 
 # Create the classifier
 outputs = classifier(x, alpha, dropout, n_classes)

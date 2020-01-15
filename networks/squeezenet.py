@@ -20,27 +20,28 @@ from tensorflow.keras import Input, Model
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Concatenate, Dropout
 from tensorflow.keras.layers import GlobalAveragePooling2D, Activation
 
-def stem(inputs):
+def stem(inputs, n_filters, filter_size):
     ''' Construct the Stem Group  
 	inputs: the input tensor
     '''
-    x = Conv2D(96, (7, 7), strides=2, padding='same', activation='relu',
-               kernel_initializer='glorot_uniform')(inputs)
+    x = Conv2D(n_filters, (filter_size, filter_size), strides=2, 
+               padding='same', activation='relu', kernel_initializer='glorot_uniform')(inputs)
     x = MaxPooling2D(3, strides=2)(x)
     return x
 
-def learner(x):
+def learner(x, fire_group1_n_filters, fire_group2_n_filters,
+            fire_block_n_filters):
     ''' Construct the Learner
    	x    : input to the learner
     '''
     # First fire group, progressively increase number of filters
-    x = group(x, [16, 16, 32])
+    x = group(x, [fire_group1_n_filters, fire_group1_n_filters, 2*fire_group1_n_filters])
 
     # Second fire group
-    x = group(x, [32, 48, 48, 64])
+    x = group(x, [fire_group2_n_filters, 1.5*fire_group2_n_filters, 1.5*fire_group2_n_filters, 2*fire_group2_n_filters])
 
     # Last fire block (module)
-    x = fire_block(x, 64)
+    x = fire_block(x, fire_block_n_filters)
 
     # Dropout is delayed to end of fire groups
     x = Dropout(0.5)(x)
@@ -86,8 +87,8 @@ def classifier(x, n_classes):
 	n_classes: number of output classes
     '''
     # set the number of filters equal to number of classes
-    x = Conv2D(n_classes, (1, 1), strides=1, activation='relu', padding='same',
-               kernel_initializer='glorot_uniform')(x)
+    x = Conv2D(n_classes, (1, 1), strides=1, activation='relu', 
+               padding='same', kernel_initializer='glorot_uniform')(x)
 
     # reduce each filter (class) to a single value
     x = GlobalAveragePooling2D()(x)
@@ -98,10 +99,11 @@ def classifier(x, n_classes):
 inputs = Input((224, 224, 3))
 
 # The Stem Group
-x = stem(inputs)
+x = stem(inputs, stem_n_filters, stem_filter_size)
 
 # The Learner
-x = learner(x)
+x = learner(x, fire_group1_n_filters, fire_group2_n_filters, 
+            fire_block_n_filters)
 
 # The classifier
 outputs = classifier(x, 1000)

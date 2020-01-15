@@ -19,7 +19,7 @@ import tensorflow as tf
 from tensorflow.keras import Model
 import tensorflow.keras.layers as layers
 
-def stem(inputs):
+def stem(inputs, n_filters):
     """ Create the Stem Convolutional Group 
         inputs : the input vector
     """
@@ -27,7 +27,7 @@ def stem(inputs):
     x = layers.ZeroPadding2D(padding=(3, 3))(inputs)
     
     # First Convolutional layer which uses a large (coarse) filter 
-    x = layers.Conv2D(64, kernel_size=(7, 7), strides=(2, 2), padding='valid', use_bias=False, kernel_initializer='he_normal')(x)
+    x = layers.Conv2D(n_filters, kernel_size=(7, 7), strides=(2, 2), padding='valid', use_bias=False, kernel_initializer='he_normal')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
     
@@ -36,7 +36,7 @@ def stem(inputs):
     x = layers.MaxPool2D(pool_size=(3, 3), strides=(2, 2))(x)
     return x
 
-def bottleneck_block(n_filters, x):
+def bottleneck_block(n_filters, filter_size, x):
     """ Create a Bottleneck Residual Block with Identity Link
         n_filters: number of filters
         x        : input into the block
@@ -52,7 +52,7 @@ def bottleneck_block(n_filters, x):
     x = layers.ReLU()(x)
 
     # Bottleneck layer
-    x = layers.Conv2D(n_filters, (3, 3), strides=(1, 1), padding="same", use_bias=False, kernel_initializer='he_normal')(x)
+    x = layers.Conv2D(n_filters, (filter_size, filter_size), strides=(1, 1), padding="same", use_bias=False, kernel_initializer='he_normal')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
@@ -65,7 +65,7 @@ def bottleneck_block(n_filters, x):
     x = layers.ReLU()(x)
     return x
 
-def projection_block(n_filters, x, strides=(2,2)):
+def projection_block(n_filters, filter_size, x, strides=(2,2)):
     """ Create Bottleneck Residual Block with Projection Shortcut
         Increase the number of filters by 4X
         n_filters: number of filters
@@ -86,7 +86,7 @@ def projection_block(n_filters, x, strides=(2,2)):
     x = layers.ReLU()(x)
 
     # Bottleneck layer
-    x = layers.Conv2D(n_filters, (3, 3), strides=(1, 1), padding='same', use_bias=False, kernel_initializer='he_normal')(x)
+    x = layers.Conv2D(n_filters, (filter_size, filter_size), strides=(1, 1), padding='same', use_bias=False, kernel_initializer='he_normal')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
@@ -116,39 +116,40 @@ def classifier(x, n_classes):
 inputs = layers.Input(shape=(224, 224, 3))
 
 # The stem convolutional group
-x = stem(inputs)
+x = stem(inputs, stem_n_filters)
 
 # First Residual Block Group of 64 filters
 # Double the size of filters to fit the first Residual Group
-x = projection_block(64, x, strides=(1,1))
+x = projection_block(projection_block_n_filters,projection_block_filter_size, x, 
+                     strides=(1,1))
 
 # Identity residual blocks
 for _ in range(2):
-    x = bottleneck_block(64, x)
+    x = bottleneck_block(bottleneck_block_n_filters,bottleneck_block_filter_size, x)
 
 # Second Residual Block Group of 128 filters
 # Double the size of filters and reduce feature maps by 75% (strides=2, 2) to fit the next Residual Group
-x = projection_block(128, x)
+x = projection_block(2*projection_block_n_filters,projection_block_filter_size, x)
 
 # Identity residual blocks
 for _ in range(3):
-    x = bottleneck_block(128, x)
+    x = bottleneck_block(2*bottleneck_block_n_filters,bottleneck_block_filter_size, x)
 
 # Third Residual Block Group of 256 filters
 # Double the size of filters and reduce feature maps by 75% (strides=2, 2) to fit the next Residual Group
-x = projection_block(256, x)
+x = projection_block(4*projection_block_n_filters,projection_block_filter_size, x)
 
 # Identity residual blocks
 for _ in range(5):
-    x = bottleneck_block(256, x)
+    x = bottleneck_block(4*bottleneck_block_n_filters,bottleneck_block_filter_size, x)
 
 # Fourth Residual Block Group of 512 filters
 # Double the size of filters and reduce feature maps by 75% (strides=2, 2) to fit the next Residual Group
-x = projection_block(512, x)
+x = projection_block(8*projection_block_n_filters,projection_block_filter_size, x, x)
 
 # Identity residual blocks
 for _ in range(2):
-    x = bottleneck_block(512, x)
+    x = bottleneck_block(8*bottleneck_block_n_filters,bottleneck_block_filter_size, x)
 
 # The classifier for 1000 classes
 outputs = classifier(x, 1000)
