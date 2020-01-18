@@ -11,11 +11,13 @@ import numpy as np
 from src.Utils import Utils
 from src.Sample import Sample
 from src.Config import ConfigReal
+from src.config_hardware import ConfigHardware
+from src.compute_performance import ComputePerformance 
 from src.SurrogateModel import SurrogateModel
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.gaussian_process import GaussianProcessRegressor 
-from sklearn.gaussian_process.kernels import ConstantKernel, RBF 
-
+from sklearn.gaussian_process.kernels import ConstantKernel, RBF
+ 
 class FlexiBO(object):
     """This class is used to implement an active learning approach to optimize
     multiple objectives of different cost
@@ -114,39 +116,40 @@ class FlexiBO(object):
         init_X1=init_X[:]
         init_X2=init_X[:]
         rbf=ConstantKernel(1.0)*RBF(length_scale=1.0)
-        gpr=GaussianProcessRegressor(kernel=rbf,n_restarts_optimizer=9)
+        gpr1=GaussianProcessRegressor(kernel=rbf,n_restarts_optimizer=9)
+        gpr2=GaussianProcessRegressor(kernel=rbf,n_restarts_optimizer=9)
+        print (init_X)
         # bo loop
         for iteration in range(0,self.NUM_ITER):
             print ("---------------------------------------Iteration: ",iteration)
             REGION=[{} for _ in U]
             
             # Fit a GP for each objective
-            #model_o1=self.SM.fit_gp(init_X1,init_Y1)
-            #model_o2=self.SM.fit_gp(init_X2,init_Y2)
-            model_o1=gpr.fit(init_X1,init_Y1)
-            model_o2=gpr.fit(init_X2,init_Y2)
-
+            model_o1=self.SM.fit_gp(init_X1,init_Y1)
+            model_o2=self.SM.fit_gp(init_X2,init_Y2)
+            #model_o1=gpr1.fit(init_X1,init_Y1)
+            #model_o2=gpr2.fit(init_X2,init_Y2)
+            
             for config in range(0,len(U)):
                 # Compute mu and sigma of each points for each objective 
                 cur=np.array([U[config]])
                 cur_eval=self.O[config]
                 # Objective 1
                 if cur_eval["o1"] is False:
-                    #(mu_o1,sigma_o1)=self.SM.get_gp_model_params(model_o1,cur)
-                    mu_o1, sigma_o1= model_o1.predict(cur,return_std=True)
+                    (mu_o1,sigma_o1)=self.SM.get_gp_model_params(model_o1,cur)
+                    #mu_o1, sigma_o1= model_o1.predict(cur,return_std=True)
                     
                 else:
                     (mu_o1,sigma_o1)=(self.measurement[config]["o1"],0)
-            
+                 
                 # Objective 2
                 if cur_eval["o2"] is False:
-                    #(mu_o2,sigma_o2)=self.SM.get_gp_model_params(model_o2,cur)
-                    mu_o2, sigma_o2= model_o2.predict(cur,return_std=True)
-                    
+                    (mu_o2,sigma_o2)=self.SM.get_gp_model_params(model_o2,cur)                   
+                    #mu_o2, sigma_o2= model_o2.predict(cur,return_std=True)[0]
                 else:
                     (mu_o2,sigma_o2)=(self.measurement[config]["o2"],0)
                 
-                # Compute uncertainty region for each point using mu and sigma
+                # Compute uncertainty region for each point using mu and sigma                
                 REGION[config]["pes"]=[
                 0 if (mu_o1-math.sqrt(BETA)*sigma_o1)<0 else mu_o1-math.sqrt(BETA)*sigma_o1,
                 0 if (mu_o2-math.sqrt(BETA)*sigma_o2)<0 else mu_o2-math.sqrt(BETA)*sigma_o2
@@ -156,18 +159,8 @@ class FlexiBO(object):
                                        mu_o1+math.sqrt(BETA)*sigma_o1,
                                        mu_o2+math.sqrt(BETA)*sigma_o2
                                       ]
-            print (REGION)
-            """
-            REGION=[
-                   {'opt': [2, 11], 'avg': [1, 10], 'pes': [0.5,9]},
-                   {'opt': [3, 9], 'avg': [2.5, 8], 'pes': [1.5,7]},
-                   {'opt': [1.5, 7], 'avg': [1, 6], 'pes': [0.5,5]},
-                   {'opt': [5, 6], 'avg': [4.5, 5], 'pes': [4,4]},
-                   {'opt': [7.5, 4], 'avg': [6.5, 3], 'pes': [6,2.5]},
-                   {'opt': [3.5, 3.5], 'avg': [3, 3], 'pes': [2.5,2.5]},
-                   {'opt': [5.5, 3], 'avg': [5, 2], 'pes': [4.5,1.5]}
-                   ] 
-            """
+            
+           
             # Determine undominated points
             (undominated_points_ind,
             undominated_points)=self.utils.identify_undominated_points(REGION)
@@ -199,15 +192,22 @@ class FlexiBO(object):
             
             # Perform measurement on next sample on the objective returned
             # Update init_X and init_Y
+            
+            
             if objective=="o1":
-                cur_X1=np.array(next_sample)
-                cur_Y1=np.array(self.rf1.predict([cur_X1]))
+                # Evaluate Objective O1
+                ConfigHardware(next_sample)
+                ComputePerformance()
+                cur_X1=np.array(next_sample)               
+                
+                #cur_Y1=np.array(self.rf1.predict([cur_X1]))
                 self.O[next_sample_index]["o1"]=True
                 self.measurement[next_sample_index]["o1"]=cur_Y1[0]
                 np.vstack((init_X1,cur_X1))
                 np.vstack((init_Y1,cur_Y1))
             if objective=="o2":
                 cur_X2=np.array(next_sample)
+                ComputePerformance()
                 cur_Y2=np.array(self.rf2.predict([cur_X2]))
                 self.O[next_sample_index]["o2"]=True
                 self.measurement[next_sample_index]["o2"]=cur_Y2[0]

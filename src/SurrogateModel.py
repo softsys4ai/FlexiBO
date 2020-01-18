@@ -1,6 +1,5 @@
 import GPy
 
-
 class SurrogateModel:
     """This class is used for surrogate models 
     """
@@ -25,4 +24,3 @@ class SurrogateModel:
         [mu,sigma] = model.predict(x,full_cov=1)
         return mu[0,0], sigma[0,0]
     
-

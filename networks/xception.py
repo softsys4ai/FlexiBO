@@ -18,7 +18,7 @@
 import tensorflow as tf
 from tensorflow.keras import layers, Input, Model
 
-def entryFlow(inputs):
+def entryFlow(inputs, n_filters,filter_size):
     """ Create the entry flow section
         inputs : input tensor to neural network
     """
@@ -29,13 +29,13 @@ def entryFlow(inputs):
         """
         # Strided convolution - dimensionality reduction
         # Reduce feature maps by 75%
-        x = layers.Conv2D(32, (3, 3), strides=(2, 2))(inputs)
+        x = layers.Conv2D(n_filters, (filter_size, filter_size), strides=(2, 2))(inputs)
         x = layers.BatchNormalization()(x)
         x = layers.ReLU()(x)
 
         # Convolution - dimensionality expansion
         # Double the number of filters
-        x = layers.Conv2D(64, (3, 3), strides=(1, 1))(x)
+        x = layers.Conv2D(2*n_filters, (filter_size, filter_size), strides=(1, 1))(x)
         x = layers.BatchNormalization()(x)
         x = layers.ReLU()(x)
         return x
@@ -44,21 +44,21 @@ def entryFlow(inputs):
     x = stem(inputs)
 
     # Create three residual blocks
-    for n_filters in [128, 256, 728]:
-        x = projection_block(x, n_filters)
+    for filters in [n_filters, n_filters*2, 728]:
+        x = projection_block(x, n_filters,filter_size)
 
     return x
 
-def middleFlow(x):
+def middleFlow(x,n_filters,filter_size):
     """ Create the middle flow section
         x : input tensor into section
     """
     # Create 8 residual blocks
     for _ in range(8):
-        x = residual_block(x, 728)
+        x = residual_block(x, 728,filter_size )
     return x
 
-def exitFlow(x, n_classes):
+def exitFlow(x, n_classes,filter_size):
     """ Create the exit flow section
         x         : input to the exit flow section
         n_classes : number of output classes
@@ -87,12 +87,12 @@ def exitFlow(x, n_classes):
 
     # First Depthwise Separable Convolution
     # Dimensionality reduction - reduce number of filters
-    x = layers.SeparableConv2D(728, (3, 3), padding='same')(x)
+    x = layers.SeparableConv2D(728, (filter_size, filter_size), padding='same')(x)
     x = layers.BatchNormalization()(x)
 
     # Second Depthwise Separable Convolution
     # Dimensionality restoration
-    x = layers.SeparableConv2D(1024, (3, 3), padding='same')(x)
+    x = layers.SeparableConv2D(1024, (filter_size, filter_size), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
@@ -103,12 +103,12 @@ def exitFlow(x, n_classes):
     x = layers.add([x, shortcut])
 
     # Third Depthwise Separable Convolution
-    x = layers.SeparableConv2D(1556, (3, 3), padding='same')(x)
+    x = layers.SeparableConv2D(1556, (filter_size, filter_size), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
     # Fourth Depthwise Separable Convolution
-    x = layers.SeparableConv2D(2048, (3, 3), padding='same')(x)
+    x = layers.SeparableConv2D(2048, (filter_size, filter_size), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
@@ -117,7 +117,7 @@ def exitFlow(x, n_classes):
 
     return x
 
-def projection_block(x, n_filters):
+def projection_block(x, n_filters,filter_size):
     """ Create a residual block using Depthwise Separable Convolutions with Projection shortcut
         x        : input into residual block
         n_filters: number of filters
@@ -131,12 +131,12 @@ def projection_block(x, n_filters):
     shortcut = layers.BatchNormalization()(shortcut)
 
     # First Depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
+    x = layers.SeparableConv2D(n_filters, (filter_size, filter_size), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
     # Second depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
+    x = layers.SeparableConv2D(n_filters, (filter_size, filter_size), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
@@ -148,7 +148,7 @@ def projection_block(x, n_filters):
 
     return x
 
-def residual_block(x, n_filters):
+def residual_block(x, n_filters,filter_size):
     """ Create a residual block using Depthwise Separable Convolutions
         x        : input into residual block
         n_filters: number of filters
@@ -157,17 +157,17 @@ def residual_block(x, n_filters):
     shortcut = x
 
     # First Depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
+    x = layers.SeparableConv2D(n_filters, (filter_size, filter_size), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
     # Second depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
+    x = layers.SeparableConv2D(n_filters, (filter_size, filter_size), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
 
     # Third depthwise Separable Convolution
-    x = layers.SeparableConv2D(n_filters, (3, 3), padding='same')(x)
+    x = layers.SeparableConv2D(n_filters, (filter_size, filter_size), padding='same')(x)
     x = layers.BatchNormalization()(x)
     x = layers.ReLU()(x)
     
@@ -176,16 +176,26 @@ def residual_block(x, n_filters):
     return x
 
 # Create the input vector
-inputs = Input(shape=(299, 299, 3))
+inputs = Input(shape=(32, 32, 3))
 
 # Create entry section
-x = entryFlow(inputs)
+x = entryFlow(inputs,entry_flow_n_filters, entry_flow_filter_size)
 
 # Create the middle section
-x = middleFlow(x)
+x = middleFlow(x,middle_flow_n_filters,middle_flow_filter_size)
 
 # Create the exit section for 1000 classes
-outputs = exitFlow(x, 1000)
+outputs = exitFlow(x, 10,exit_flow_filter_size)
 
 # Instantiate the model
 model = Model(inputs, outputs)
+
+model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['acc'])
+model.summary()
+
+from tensorflow.keras.datasets import cifar10 
+import numpy as np
+(x_train, y_train), (x_test, y_test) = cifar10.load_data() 
+x_train = (x_train / 255.0).astype(np.float32) 
+x_test = (x_test / 255.0).astype(np.float32) 
+model.fit(x_train, y_train, epochs=10, batch_size=32, validation_split=0.1, verbose=1)
