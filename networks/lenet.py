@@ -9,15 +9,23 @@ from keras.layers import Conv2D, MaxPooling2D
 class Lenet(object):
     """This class is used to train Lenet
     """
-    def __init__(self, n_filters, filter_size):
+    def __init__(self, layer1_n_filters, layer1_filter_size,
+                layer2_n_filters, layer2_filter_size, layer3_n_filters, 
+                layer3_filter_size, layer4_n_filters, layer4_filter_size):
         print ("initializing lenet class")
         # network config options
-        self.n_filters = n_filters
-        self.filter_size = filter_size 
+        self.layer1_n_filters = layer1_n_filters
+        self.layer1_filter_size = layer1_filter_size
+        self.layer2_n_filters = layer2_n_filters
+        self.layer2_filter_size = layer2_filter_size
+        self.layer3_n_filters = layer3_n_filters
+        self.layer3_filter_size = layer3_filter_size
+        self.layer4_n_filters = layer4_n_filters
+        self.layer4_filter_size = layer4_filter_size 
         # params
         self.batch_size = 32
         self.num_classes = 10
-        self.epochs = 1
+        self.epochs = 20
         self.num_predictions = 20
         
         if dataset == "cifar10":
