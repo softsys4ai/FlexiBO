@@ -1,52 +1,67 @@
 #!/usr/bin/python
 import os 
 import sys
-import commands
-import subprocess
-from Configuration import Config as cfg
+import paramiko
+import traceback 
+import yaml
 
-class ConfigNetworkOptions(object):
-    """This class is used to create different configuration space for jetson  tx2
+class ConfigNetwork(object):
+    """This class is used to 
     """
-    def __init__(self,
-                 cur_config):
+    def __init__(self, cur_net, cur_config):
                
-        self.logger.info("[STATUS]: Initializing ConfigNetworkOptions Class")
         self.cur_config=cur_config
-                                         
-    def set_big_core_status(self,
-                            cpu_name,
-                            status):
-        """This function is used set core status (enable or disable)
-        ------------------------------------------------------------------------
-        @args:
-             cpu_name: cpu that will be enabled or disabled
-        @returns:
-        boolean: whether the operation was successful or not
-        ------------------------------------------------------------------------  
-        """
+        self.network=cur_net
+        with open("config.yaml") as fp:
+            cfg=yaml.load(fp)
+        # host
+        self.host=cfg["config"]["online"]["remote"]["host"]
+        # username
+        self.user=cfg["config"]["online"]["remote"]["user"]
+        # password
+        self.passwd=cfg["config"]["online"]["remote"]["pass"]
+        # keyfile
+        self.keyfile=cfg["config"]["online"]["remote"]["keyfile"]
+        # remote code directory
+        self.remote_code_dir=cfg["config"]["online"]["remote"]["network"]["code_dir"]
+        self.remote_code_dir=self.remote_code_dir.replace("network",cur_net)
+        # remote model directory
+        self.remote_model_dir=cfg["config"]["online"]["remote"]["network"]["model_dir"]
+        self.remote_model_dir=self.remote_model_dir.replace("network",cur_net)
+        # remote current configuration directory
+        self.remote_conf_dir=cfg["config"]["online"]["remote"]["network"]["conf_dir"]
+        self.remote_conf_dir=self.remote_conf_dir.replace("network",cur_net)
         
-        if cpu_name!="cpu0":
-            filename="{0}{1}{2}".format("/sys/devices/system/cpu/",
-                                       cpu_name,
-                                       "/online"
-                                       )
-            cur_status=commands.getstatusoutput("cat {0}".format(filename))[1]   
-            if cur_status!=status:
-                res=subprocess.call(["sudo","sh","./measurement/change_core_status.sh",str(cpu_name),str(status)])
-                if res!=0:
-                    err="subprocess command failed"
-                    print("[CPU STATUS ERROR]: {0}".format(err))
-                    return False
-                # check if the operation is successful
-                new_status= commands.getstatusoutput("cat {0}".format(filename))[1]
-                if new_status!=status:
-                    print ("[CPU STATUS ERROR]: "+cpu_name+ "\n"
-                                       "expected: " + str(status) + "\n"
-                                       "actual: "+ str(new_status))
-                    return False
-                return True
-        else:
-            print("invalid cpu_name argument")
+        # current configuration
+        self.cur_config=cur_config
+        self.store_conf()
+        #self.get_model()
 
+    def get_model(self):
+        """This is a function for establishing remote connection
+        """
+        try:
+            key=paramiko.RSAKey.from_private_key_file(self.keyfile)
+            ssh_client=paramiko.SSHClient()
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh_client.connect(hostname=self.host, username=self.user, password=self.passwd, 
+                               pkey=key)
+            #stdin, stdout, stderr=ssh_client.exec_command("python /home/tester/FlexiBO/models/xception.py")
+        
+            ftp_client=ssh_client.open_sftp()
+            ftp_client.get("/home/tester/model.h5","/home/nvidia/model.h5")
+            ftp_client.close()
+        except:
+            traceback.print_exc()
+            print ("[ERROR]: could not ssh")
 
+    def store_conf(self):
+        """This function is used to store current configuration to yaml
+        """
+        conf=dict(cur_conf=self.cur_config)
+        with open ("cur_config.yaml","w", ) as curfp:
+            yaml.dump(conf, curfp, default_flow_style=False)
+ConfigNetwork("xception", [16,3,16,16,16])
+    
+with open ("cur_config.yaml","r") as pfp:
+    pfg=yaml.load(pfp)
