@@ -1,4 +1,8 @@
-# FlexiBO
+<p align="center">
+<img src="https://github.com/softsys4ai/FlexiBO/blob/master/reports/figures/implementation.png" width="100%" height="100%" title="FlexiBO logo">
+<p>
+
+# FlexiBO: Cost-Aware Multi-Objective Optimization of Deep Neural Networks
 A multi-objective optimization algorithm to optimize multiple objectives of 
 different costs. Currently, we support multi-objective optimization of two 
 different objectives using gaussian process (GP) and random forest (RF) surrogate 
