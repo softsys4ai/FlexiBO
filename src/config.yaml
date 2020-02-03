@@ -12,17 +12,17 @@ config:
         O2: 1
     online:
         remote:
-            host: 35.192.58.109
+            host: 35.225.254.245
             user: tester
             pass: tester 
             keyfile: key
             network: 
-                code_dir: /home/tester/FlexiBO/models/network/network.py
-                model_dir: /home/tester/FlexiBO/models/network/model.h5
-                conf_dir: /home/tester/FlexiBO/models/network/cur.yaml
+                code_dir: network.py
+                model_dir: /home/tester/model.h5
+                conf_dir: /home/tester/cur_config.yaml
         local:
-            conf_dir: /home/nvidia/FlexiBO/cur_conf.yaml
-            model_dir: /home/nvidia/FlexiBO/model.h5    
+            conf_dir: /home/nvidia/Shahriar/FlexiBO/cur_config.yaml
+            model_dir: /home/nvidia/Shahriar/FlexiBO/models/model.h5    
         
     offline:
         measurement_dir: /home/nvidia/FlexiBO/measurements/trans.csv

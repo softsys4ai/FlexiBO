@@ -32,7 +32,7 @@ class ConfigNetwork(object):
         self.remote_conf_dir=cfg["config"]["online"]["remote"]["network"]["conf_dir"]
         self.remote_conf_dir=self.remote_conf_dir.replace("network",cur_net)
         # local model directory
-        self.local_conf_dir=cfg["config"]["online"]["local"]["model_dir"]
+        self.local_model_dir=cfg["config"]["online"]["local"]["model_dir"]
         # local model directory
         self.local_conf_dir=cfg["config"]["online"]["local"]["conf_dir"]
         # current configuration
@@ -50,9 +50,10 @@ class ConfigNetwork(object):
             ssh_client.connect(hostname=self.host, username=self.user, password=self.passwd, 
                                pkey=key)
             ftp_client=ssh_client.open_sftp()
-            ftp_client.put(self.remote_conf_dir,self.local_conf_dir)
-            command= "python "+str(self.remote_model_dir)
+            ftp_client.put(self.local_conf_dir,self.remote_conf_dir)
+            command= "python "+str(self.remote_code_dir)
             stdin, stdout, stderr=ssh_client.exec_command(command)
+            print (stdout.readlines())
             ftp_client.get(self.remote_model_dir, self.local_model_dir)
             ftp_client.close()
         except:
@@ -65,3 +66,6 @@ class ConfigNetwork(object):
         conf=dict(cur_conf=self.cur_config)
         with open ("cur_config.yaml","w", ) as curfp:
             yaml.dump(conf, curfp, default_flow_style=False)
+
+
+

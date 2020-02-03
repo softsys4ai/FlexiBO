@@ -11,11 +11,13 @@ from apscheduler.schedulers.background import BackgroundScheduler
 class ComputePerformance(object):
     """This function is used to compute accuracy and energy consumption
     """
-    def __init__(self):
+    def __init__(self, fname, objectives,
+                data):
         print ("[STATUS]: Initializing Compute Performance Class")
         with open("config.yaml") as fp:
             self.cfg=yaml.load(fp)
         self.cur_sys="TX2"
+        self.fname=fname 
         self.model=self.get_model()
         (self.x_test, self.y_test)=self.get_test_data()
         self.total_power=list()
@@ -27,13 +29,21 @@ class ComputePerformance(object):
         self.sched=BackgroundScheduler(job_defaults=job_defaults)
         # add background job
         self.sched.start()
-        self.sched.add_job(self.compute_power,"interval",seconds=.03)       
-        # start        
-        self.inference_time=self.compute_inference_time()
+        if "energy" in objectives:
+            self.sched.add_job(self.compute_power,"interval",seconds=.03)       
+        # start
+        if "accuracy" in objectives:             
+            self.inference_time=self.compute_inference_time()
         # end
         self.sched.shutdown()
     
-    
+    def get_model(self):
+        """This function is used to load saved models
+        """
+        from keras.models import load_model
+        model=load_model(self.fname)
+        return model
+
     def compute_power(self):
         """This function is used to read power consumption using from INA monitor 
         """
@@ -58,10 +68,9 @@ class ComputePerformance(object):
     
     def get_output_metrics(self):
         """This file is used to return output data 
-        """
-        
+        """       
         self.total_power=[int(i) if i is not None else 0 for i in self.total_power ]    
         self.total_power=np.sum(self.total_power)   
         return self.inference_time, self.total_power
         
-      
+ComputePerformance("model.h5",["energy","accuracy"],"x")      

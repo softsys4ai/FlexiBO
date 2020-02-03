@@ -173,7 +173,7 @@ class FlexiBO(object):
             if objective=="o1":
                 # Evaluate Objective O1
                 ConfigHardware(next_sample)
-                ComputePerformance()
+                ComputePerformance(fname_model)
                 cur_X1=np.array(next_sample)                              
                 self.O[next_sample_index]["o1"]=True
                 self.measurement[next_sample_index]["o1"]=cur_Y1[0]
@@ -182,7 +182,7 @@ class FlexiBO(object):
             if objective=="o2":
                 cur_X2=np.array(next_sample)
                 ConfigNetwork(self.network, next_sample)
-                ComputePerformance()
+                ComputePerformance(fname_model)
                 self.O[next_sample_index]["o2"]=True
                 self.measurement[next_sample_index]["o2"]=cur_Y2[0]
                 np.vstack((init_X2,np.array(next_sample)))

@@ -162,5 +162,5 @@ if __name__=="__main__":
               batch_size=32, validation_split=0.1, verbose=1)
     
     # save model
-    fmodel=os.path.join(os.get_cwd(),"model.h5") 
+    fmodel=os.path.join(os.getcwd(),"model.h5") 
     model.save(fmodel)

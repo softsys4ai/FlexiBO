@@ -217,11 +217,11 @@ if __name__=="__main__":
     model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['acc'])
     model.summary()
 
-    xtrain, ytrain, x_test, y_test=get_data()    
+    x_train, y_train, x_test, y_test=get_data()    
     # train model
-    model.fit(x_train, y_train, epochs=10, 
+    model.fit(x_train, y_train, epochs=1, 
               batch_size=32, validation_split=0.1, verbose=1)
     
     # save model
-    fmodel=os.path.join(os.get_cwd(),"model.h5") 
+    fmodel=os.path.join(os.getcwd(),"model.h5") 
     model.save(fmodel)
