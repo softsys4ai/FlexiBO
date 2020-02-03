@@ -21,23 +21,33 @@ FlexiBO please resolve the following dependencies:
 
 
 ## Run
-To run FlexiBO use the following command:
+To run FlexiBO in online mode use the following command:
 ```python
-command: python RunFlexiBO.py [surrogate model]
+command: python RunFlexiBO.py -m online -d data -s surrogate
 ```
-For example, to run optimization with GP use: 
+For example, to run optimization with GP in online with measurements.csv as initial data use: 
 ```python
-command: python RunFlexiBO.py GP
+command: python RunFlexiBO.py -m online -d measurements.csv -s GP
+
+To run FlexiBO in offline mode use the following command:
+```python
+command: python RunFlexiBO.py -m offline -d data -s surrogate
+```
+For example, to run optimization with RF in online with measurements.csv as initial data use: 
+```python
+command: python RunFlexiBO.py -m offline -d measurements.csv -s RF
 ```
 
 ## Citing this work
 
-If you use Athena for academic or industrial research, please feel free to cite the following [paper](https://arxiv.org/pdf/2001.00308.pdf):
+If you use FlexiBO for academic or industrial research, please feel free to cite the following [paper](https://arxiv.org/pdf/2001.00308.pdf):
 
 ```
-@article{athena2020,
+@article{shahriar2020flexibo,
   title={FlexiBO: Cost-Aware Multi-Objective Optimization of Deep Neural Networks},
-  author={Iqbal, Shahriar and Su, Jianhai and Kotthoff, Lars and Jamshidi, Pooyan},
+  author={Shahriar Iqbal, Md and Su, Jianhai and Kotthoff, Lars and Jamshidi, Pooyan},
+  journal={arXiv},
+  pages={arXiv--2001},
   year={2020}
 }
 ```
