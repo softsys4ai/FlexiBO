@@ -10,7 +10,7 @@ class ConfigNetwork(object):
     """
     def __init__(self, cur_net, cur_config):
                
-        self.cur_config=cur_config
+        self.cur_config=cur_config[8:]
         self.network=cur_net
         with open("config.yaml") as fp:
             cfg=yaml.load(fp)
@@ -31,11 +31,14 @@ class ConfigNetwork(object):
         # remote current configuration directory
         self.remote_conf_dir=cfg["config"]["online"]["remote"]["network"]["conf_dir"]
         self.remote_conf_dir=self.remote_conf_dir.replace("network",cur_net)
-        
+        # local model directory
+        self.local_conf_dir=cfg["config"]["online"]["local"]["model_dir"]
+        # local model directory
+        self.local_conf_dir=cfg["config"]["online"]["local"]["conf_dir"]
         # current configuration
         self.cur_config=cur_config
         self.store_conf()
-        #self.get_model()
+        self.get_model()
 
     def get_model(self):
         """This is a function for establishing remote connection
@@ -46,10 +49,11 @@ class ConfigNetwork(object):
             ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh_client.connect(hostname=self.host, username=self.user, password=self.passwd, 
                                pkey=key)
-            #stdin, stdout, stderr=ssh_client.exec_command("python /home/tester/FlexiBO/models/xception.py")
-        
             ftp_client=ssh_client.open_sftp()
-            ftp_client.get("/home/tester/model.h5","/home/nvidia/model.h5")
+            ftp_client.put(self.remote_conf_dir,self.local_conf_dir)
+            command= "python "+str(self.remote_model_dir)
+            stdin, stdout, stderr=ssh_client.exec_command(command)
+            ftp_client.get(self.remote_model_dir, self.local_model_dir)
             ftp_client.close()
         except:
             traceback.print_exc()
@@ -61,7 +65,3 @@ class ConfigNetwork(object):
         conf=dict(cur_conf=self.cur_config)
         with open ("cur_config.yaml","w", ) as curfp:
             yaml.dump(conf, curfp, default_flow_style=False)
-ConfigNetwork("xception", [16,3,16,16,16])
-    
-with open ("cur_config.yaml","r") as pfp:
-    pfg=yaml.load(pfp)

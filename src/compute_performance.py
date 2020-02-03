@@ -3,22 +3,23 @@ import sys
 import subprocess
 import time
 import json
+import yaml
 import numpy as np
-from Configuration import Config as cfg
 from multiprocessing import Process
 from apscheduler.schedulers.background import BackgroundScheduler
 
 class ComputePerformance(object):
-    """This function is used to compute cpu,gpu and total power and measure inference time
+    """This function is used to compute accuracy and energy consumption
     """
     def __init__(self):
         print ("[STATUS]: Initializing Compute Performance Class")
-        
+        with open("config.yaml") as fp:
+            self.cfg=yaml.load(fp)
         self.cur_sys="TX2"
         self.model=self.get_model()
         (self.x_test, self.y_test)=self.get_test_data()
         self.total_power=list()
-        print (self.x_test)
+       
         # create scheduler
         job_defaults= {"coalesce":False,
                        "max_instances":1
@@ -32,23 +33,11 @@ class ComputePerformance(object):
         # end
         self.sched.shutdown()
     
-    def get_model(self):
-        """This function is used to get model
-        """
-        from keras.applications import ResNet50
-        self.model=ResNet50()
-
-    def get_test_data(self):
-        """This function is used to get test data
-        """ 
-        from keras.datasets import cifar10      
-        (_, _), (x_test, y_test) = cifar10.load_data()
-        return (x_test,y_test)
-
+    
     def compute_power(self):
         """This function is used to read power consumption using from INA monitor 
         """
-        filename=cfg.systems[self.cur_sys]["power"]["total"]
+        filename=self.cfg["config"]["systems"][self.cur_sys]["power"]["total"]
         try:
             
             self.total_power.append(subprocess.getstatusoutput("cat {0}".format(filename))[1])
@@ -75,4 +64,4 @@ class ComputePerformance(object):
         self.total_power=np.sum(self.total_power)   
         return self.inference_time, self.total_power
         
-ComputePerformance()        
+      

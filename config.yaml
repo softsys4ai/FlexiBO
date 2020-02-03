@@ -21,8 +21,8 @@ config:
                 model_dir: /home/tester/FlexiBO/models/network/model.h5
                 conf_dir: /home/tester/FlexiBO/models/network/cur.yaml
         local:
-            conf_dir: /home/nvidia/FlexiBO/cur_conf.yaml
-            model_dir: /home/nvidia/FlexiBO/model.h5    
+            conf_dir: /home/nvidia/Shahriar/FlexiBO/cur_conf.yaml
+            model_dir: /home/nvidia/Shahriar/FlexiBO/models/model.h5    
         
     offline:
         measurement_dir: /home/nvidia/FlexiBO/measurements/trans.csv

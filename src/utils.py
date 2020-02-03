@@ -10,12 +10,11 @@ import numpy as np
 from operator import itemgetter
 
 class Utils(object):
-    def __init__(self):
-        print ("Initializing Utils Class")
-        self.O1_IND=1
-        self.O2_IND=0
+    def __init__(self, o1_ind, o2_ind):
+        print ("[STATUS]: Initializing Utils Class")
+        self.O1_IND=o1_ind
+        self.O2_IND=o2_ind
         
-
     def compute_pareto_volume(self,
                               front):
         """@COMPUTE_PARETO_VOLUME

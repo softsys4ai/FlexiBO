@@ -1,12 +1,11 @@
-#! /usr/bin/env python2.7
 import numpy as np
 from operator import itemgetter
 
 class Pareto(object):
-    def __init__(self):
-        print " [STATUS]: initializing pareto class"
-        self.O1_IND = 1
-        self.O2_IND = 0
+    def __init__(self, o1_ind, o2_ind):
+        print ("[STATUS]: initializing pareto class")
+        self.O1_IND = o1_ind
+        self.O2_IND = o2_ind
 
     def compute_pareto_volume(self,
                               front):
@@ -24,7 +23,6 @@ class Pareto(object):
             prev_x = point[self.O2_IND]
 
         return area
-
 
     def construct_pes_pareto_front(
                                    self,
@@ -72,8 +70,6 @@ class Pareto(object):
                                 for i in xrange(len(orig))]
         return sampled_pess_pareto
 
-
-
     def construct_opt_pareto_front(
                                    self,
                                    pareto_points_ind,
@@ -107,7 +103,6 @@ class Pareto(object):
 
 
         return sampled_opt_pareto
-
 
     def identify_undom_points(
                               self,
