@@ -4,58 +4,48 @@
 SUBMISSION: 58
 TITLE: FlexiBO: A Cost-Aware Multi-Objective Optimization Algorithm to Optimize Deep Neural Network Systems
 
-
 ## Review 1
  SUBMISSION: 58
- TITLE: FlexiBO: A Cost-Aware Multi-Objective Optimization Algorithm to Optimize Deep Neural Network Systems
- AUTHORS: Md Shahriar Iqbal, Jianhai Su, Lars Kotthoff and Pooyan Jamshidi
 
- ###----------- Overall Evaluation -----------
+
+### ----------- Overall Evaluation -----------
  SCORE: 2 (accept)
- ###----------- Article summary -----------
+### ----------- Article summary -----------
  the manuscript addresses the problem of optimizing design of a Deep Neural Network (DNN) with respect to multiple objectives, whose evaluation subtends strongly different computational efforts and possible limitations given by resource-constrained running environments (e.g.: evaluation of the time spent in training takes much longer time than evaluation of the inference performance; tasks performed at the edge ar subject to stronger limitations; ... ).
  The manuscript proposes a Bayesian multi-objective optimization algorithm (FlexiBO) that conditions optimization search on the different cost of multiple objectives so as to balance the gain in information with its cost, and to efficiently select the points (i.e. DNN configurations) that are more likely to enlarge the Pareto-front of optimization. To this end, selection of sampled points is driven by surrogate regression models (a Gaussian Process or a Random Forest) that provide a measure of uncertainty associated with each objective.
  Experimental results obtained on a suite of DNNs from the literature (8 different architectures, designed for domains of object detection, Natural Language Processing and speech recognition) indicate that for a fixed search cost, the approach permits a significant gain in the identification of the Pareto front with respect to the state of the art benchmark. As a part of contribution, the work is accompanied by a significant dataset reporting on experiments taken.
- ###----------- Main strengths -----------
+### ----------- Main strengths -----------
  The paper is very well written, with concepts always introduced in a way that couples intuition and sharpness, smoothing the difficulty and the dependency on concepts that may be not common in the audience of this Conference. Technical treatment is clean and definitely sound (I'm not able to tell about DNNs, but this seems not to be the core point but rather just a kind of killer application for the proposed technique), built on an educated ground and accompanied by a relevant experimentation. Overall the work contributes to the wider and timely subject of engineering the performance of applications that rely on machine learning approaches.
- ###----------- Main weaknesses -----------
+### ----------- Main weaknesses -----------
  The work has relevant roots in the areas of (multi-objective) optimization and Deep Neural Networks, which might be not completely accessible to the average audience of this Conference.
- ###----------- Details and suggestions for improvement -----------
+### ----------- Details and suggestions for improvement -----------
  just a comment because this is required: I guess that the same approach might be applied to optimization of design of a large class of software intensive systems, not restrained to the case of Deep Neural Networks.
- ###----------- Suggested references -----------
- I' have not additional references to suggest
- ###----------- Explanation of the overall score -----------
+### ----------- Suggested references -----------
+ I have not additional references to suggest
+### ----------- Explanation of the overall score -----------
  I like this paper, for the subject it addresses, the way how it develops on the ground of optimization methods, the quality of presentation, the concreteness of experimentation.
  I have a really basic understanding about Deep Neural Networks.
- ###----------- Artifact link -----------
+### ----------- Artifact link -----------
  SELECTION: no
 
-
-
-
-
 ## Review 2
- SUBMISSION: 58
- TITLE: FlexiBO: A Cost-Aware Multi-Objective Optimization Algorithm to Optimize Deep Neural Network Systems
- AUTHORS: Md Shahriar Iqbal, Jianhai Su, Lars Kotthoff and Pooyan Jamshidi
-
-###----------- Overall Evaluation -----------
+### ----------- Overall Evaluation -----------
  SCORE: -2 (reject)
- ###----------- Article summary -----------
- The paper develops a method for multi-objective bayesian optimization that takes into account the fact that evaluating different objective functions can have different costs. This is the case for training of (deep) neural networks, where evaluating the accuracy of the network (e.g., after changing its topology) requires performing a full new training, unlike evaluating its power consumption when used in inference (e.g., after changing the CPU frequency), which can be done at a fraction of the cost.
+### ----------- Article summary -----------
+The paper develops a method for multi-objective bayesian optimization that takes into account the fact that evaluating different objective functions can have different costs. This is the case for training of (deep) neural networks, where evaluating the accuracy of the network (e.g., after changing its topology) requires performing a full new training, unlike evaluating its power consumption when used in inference (e.g., after changing the CPU frequency), which can be done at a fraction of the cost.
 
- The proposed solution builds on PAL, a previously proposed multi-objective optimization framework, and revises it by proposing an acquisition function that incorporates the cost incurred for evaluation cost.
+The proposed solution builds on PAL, a previously proposed multi-objective optimization framework, and revises it by proposing an acquisition function that incorporates the cost incurred for evaluation cost.
 
- The solution is evaluated on a range of different deep neural networks.
- ###----------- Main strengths -----------
+The solution is evaluated on a range of different deep neural networks.
+### ----------- Main strengths -----------
  + Very timely and relevant topic
  + The proposed acquisition function is interesting and makes a lot of sense
  + Solid experimental study
- ###----------- Main weaknesses -----------
+### ----------- Main weaknesses -----------
  + The writing, especially of the technical parts, is often unclear and imprecise
  + The real novel technical contribution is the definition of the new acquisition, whereas the base optimization framework is the one of PAL. This is unclear until reaching the last page of the paper.
  + The idea of factoring in the cost of testing a configuration is far from being new (see, e.g., Expected improvement per second [1])
- ###----------- Details and suggestions for improvement -----------
+### ----------- Details and suggestions for improvement -----------
  + As I detail below there are several imprecisions in the presentation of the technical contributions of the paper that hinder severely the readability of the paper. In its current form, the paper is very hard to parse and below you find several suggestions on how to clarify the parts that I found unclear.
 
  + My understanding is that the real novel technical contribution of the paper lies in the definition of a new acquisition function, whereas the "base" multi-objective optimization method (in particular the definition of the optimistic and pessimistic Pareto fronts) was originally presented in PAL. The authors mention that their approach is "reasonably similar" to PAL only in the last page of the paper. I find this quite deceptive for the reader and unfair to the authors of PAL. My recommendation is that the paper introduces a preliminary section on PAL, clarifying what are the advantages and limitations of this approach in the considered context, before presenting their contributions.
@@ -76,43 +66,40 @@ TITLE: FlexiBO: A Cost-Aware Multi-Objective Optimization Algorithm to Optimize 
  - In Section 5 I had a hard time to map Steps 2 and 3 to the algorithm presented earlier (which, as I already mentioned, is not presented very clearly). After reading the algorithm description in Section 4 I understood that by maximizing the acquisition function (i.e., Eq. 13), you had already deterrmined which configuration to test AND which objective to evaluate.
  - In Section 6.1, it would be useful to provide information on the size of the search space, on the time required to sample a configuration (on average, min/max), to evaluate the two considered objective functions, as well as to determine what configuration to sample next.
  - In Section 6.2.2, you write that in FCM "the optimization methods are allowed to run until the stopping criterion is satisfied or maximum number of iterations is reached". I may have missed it but I could not find anywhere what is the stopping criterion you used.
- ###----------- Suggested references -----------
+### ----------- Suggested references -----------
  [1] Jasper Snoek, Hugo Larochelle, Ryan P. Adams: Practical Bayesian Optimization of Machine Learning Algorithms. NIPS 2012: 2960-2968
- ###----------- Explanation of the overall score -----------
+### ----------- Explanation of the overall score -----------
  I think that the paper makes a potentially interesting contribution by proposing the use of a novel cost-aware acquisition function that can be used in the context of multi-objective bayesian optimization. However, in its current form, I do not believe that the paper is ready for publication. The two main points that I recommend to address are: i) presenting the proposed contribution in the right perspective with respect to PAL and other cost-aware acquisition functions for BO; ii) fixing the several technical imprecisions that currently hinder the understanding of the proposed technique.
- ###----------- Artifacts -----------
+### ----------- Artifacts -----------
  The code and the datasets.
- ###----------- Artifact link -----------
+### ----------- Artifact link -----------
  SELECTION: yes
 
 
 
- ## Review 3
- SUBMISSION: 58
- TITLE: FlexiBO: A Cost-Aware Multi-Objective Optimization Algorithm to Optimize Deep Neural Network Systems
- AUTHORS: Md Shahriar Iqbal, Jianhai Su, Lars Kotthoff and Pooyan Jamshidi
-
- ###----------- Overall Evaluation -----------
+## Review 3
+ 
+### ----------- Overall Evaluation -----------
  SCORE: 2 (accept)
- ###----------- Article summary -----------
- The authors propose an algorithm for detecting the Pareto-front of multiple objectives for designing deep neural networks (DNN). The novelty of the work lies in the consideration of the varying evaluation costs of each objective. This is done by an effective selection of DNN configurations to be tested through a predictive model of their evaluation cost and potential information gain. The paper is well written and easy to follow despite heavy technical content. It is particularly valuable that authors share the measurements and scripts for the reproducibility of their results. I believe this would be a strong contribution provided that the following minor issues are clarified.
- ###----------- Main strengths -----------
+### ----------- Article summary -----------
+The authors propose an algorithm for detecting the Pareto-front of multiple objectives for designing deep neural networks (DNN). The novelty of the work lies in the consideration of the varying evaluation costs of each objective. This is done by an effective selection of DNN configurations to be tested through a predictive model of their evaluation cost and potential information gain. The paper is well written and easy to follow despite heavy technical content. It is particularly valuable that authors share the measurements and scripts for the reproducibility of their results. I believe this would be a strong contribution provided that the following minor issues are clarified.
+### ----------- Main strengths -----------
  1. well written
  2. strong technical content
  3. timely
- ###----------- Main weaknesses -----------
+### ----------- Main weaknesses -----------
  1. The choice of Bayesian optimization is not motivated or justified. What are the possible alternatives and why Bayesian optimization is better? The same goes for the selection of the particular surrogate models.
 
  2. A formal definition of the problem (e.g. as a linear program) in Section 3 would avoid potential ambiguities.
 
  3. In certain cases, updating the model may be possible instead of complete retraining as suggested in step 4 of the FlexiBO. This would significantly reduce the evaluation cost. A discussion on this would be useful.
- ###----------- Details and suggestions for improvement -----------
+### ----------- Details and suggestions for improvement -----------
  please see previous section
- ###----------- Suggested references -----------
+### ----------- Suggested references -----------
  
- ###----------- Explanation of the overall score -----------
+### ----------- Explanation of the overall score -----------
  Timely and well written article, of particular interest for ICPE community.
- ###----------- Artifacts -----------
+### ----------- Artifacts -----------
  authors share measurements and scripts.
- ###----------- Artifact link -----------
+### ----------- Artifact link -----------
  SELECTION: yes
