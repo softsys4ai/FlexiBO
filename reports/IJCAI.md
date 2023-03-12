@@ -1,4 +1,4 @@
-# IJCAI
+# IJCAI 2020 Reviews
 
 ## Reviews
 ### Review 1
