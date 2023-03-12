@@ -19,6 +19,10 @@ FlexiBO please resolve the following dependencies:
 * PyTorch
 * Keras (Tensorflow)
 
+## Reviews and Rebuttals
+We thank the reviewers of IJCAI'20, ICPE'20 and JAIR for their valuable feedbacks. Their
+reviews and the rebuttals can be found here.
+[IJCAI Reviews][./reports/IJCAI.md]
 
 ## Run
 To run FlexiBO in online mode use the following command:
