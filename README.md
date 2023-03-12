@@ -19,8 +19,8 @@ FlexiBO please resolve the following dependencies:
 * PyTorch
 * Keras (Tensorflow)
 
-## Reviews and Rebuttals
-We thank the reviewers of IJCAI'20 (Rejected), ICPE'20 (Rejected) and JAIR (Accepted) for their valuable feedbacks. Their
+## Reviews and Rebuttals (ICPE'20 (Rejected) -> IJCAI'20 (Rejected) -> JAIR'23 (Accepted))
+We thank the reviewers of IJCAI'20, ICPE'20 and JAIR for their valuable feedbacks. Their
 reviews and the rebuttals can be found here.
 * [JAIR'23 reviews](https://github.com/softsys4ai/FlexiBO/blob/master/reports/JAIR.md)
 * [IJCAI'20 reviews and rebuttals](https://github.com/softsys4ai/FlexiBO/blob/master/reports/IJCAI.md)
