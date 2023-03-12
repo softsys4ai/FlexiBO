@@ -42,11 +42,11 @@ What’s the major difference between the proposed FlexiBO and traditional MOBO 
 There lacks comparison with more recent NAS strategies such as DARTS and many follow-up work after DARTS
 Liu, Hanxiao, Karen Simonyan, and Yiming Yang. "Darts: Differentiable architecture search." arXiv preprint arXiv:1806.09055 (2018).
 
-           The compared baselines are usually quite outdated.
+The compared baselines are usually quite outdated.
 
-       3. How does energy consumption defined in the actual experiments? I am not very clear what this is actually referring to?
+1. How does energy consumption defined in the actual experiments? I am not very clear what this is actually referring to?
 
-       4. How does the Hypervolume Error calculated in the real-world experiments such as resnet training? A bit more details would be helpful.
+2. How does the Hypervolume Error calculated in the real-world experiments such as resnet training? A bit more details would be helpful.
 
 Recommendation: Accept with minor revisions
 
