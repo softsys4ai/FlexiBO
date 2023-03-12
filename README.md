@@ -22,7 +22,7 @@ FlexiBO please resolve the following dependencies:
 ## Reviews and Rebuttals
 We thank the reviewers of IJCAI'20, ICPE'20 and JAIR for their valuable feedbacks. Their
 reviews and the rebuttals can be found here.
-[IJCAI Reviews][./reports/IJCAI.md]
+* [EuroSys'22 artifact evaluation reviews](https://github.com/softsys4ai/unicorn/wiki/EuroSys'22-Artifact-Evaluation) 
 
 ## Run
 To run FlexiBO in online mode use the following command:
