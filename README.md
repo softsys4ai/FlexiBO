@@ -20,9 +20,9 @@ FlexiBO please resolve the following dependencies:
 * Keras (Tensorflow)
 
 ## Reviews and Rebuttals
-We thank the reviewers of IJCAI'20, ICPE'20 and JAIR for their valuable feedbacks. Their
+We thank the reviewers of IJCAI'20 (Rejected), ICPE'20 (Rejected) and JAIR (Accepted) for their valuable feedbacks. Their
 reviews and the rebuttals can be found here.
-* [EuroSys'22 artifact evaluation reviews](https://github.com/softsys4ai/unicorn/wiki/EuroSys'22-Artifact-Evaluation) 
+* [EuroSys'22 artifact evaluation reviews](https://github.com/softsys4ai/FlexiBO/blob/master/reports/IJCAI.md)
 
 ## Run
 To run FlexiBO in online mode use the following command:
