@@ -22,7 +22,9 @@ FlexiBO please resolve the following dependencies:
 ## Reviews and Rebuttals
 We thank the reviewers of IJCAI'20 (Rejected), ICPE'20 (Rejected) and JAIR (Accepted) for their valuable feedbacks. Their
 reviews and the rebuttals can be found here.
-* [EuroSys'22 artifact evaluation reviews](https://github.com/softsys4ai/FlexiBO/blob/master/reports/IJCAI.md)
+* [IJCAI'20 reviews](https://github.com/softsys4ai/FlexiBO/blob/master/reports/IJCAI.md)
+* [ICPE'20 reviews](https://github.com/softsys4ai/FlexiBO/blob/master/reports/ICPE.md)
+* [JAIR'23 reviews](https://github.com/softsys4ai/FlexiBO/blob/master/reports/JAIR.md)
 
 ## Run
 To run FlexiBO in online mode use the following command:
